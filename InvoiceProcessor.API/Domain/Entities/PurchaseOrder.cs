@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Domain.Entities
+namespace InvoiceProcessor.Domain.Entities
 {
     public class PurchaseOrder
     {

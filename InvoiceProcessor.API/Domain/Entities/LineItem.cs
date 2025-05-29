@@ -1,6 +1,6 @@
 using System;
 
-namespace Domain.Entities
+namespace InvoiceProcessor.Domain.Entities
 {
     public class LineItem
     {
