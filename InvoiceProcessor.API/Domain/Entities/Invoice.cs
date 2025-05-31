@@ -10,6 +10,7 @@ namespace InvoiceProcessor.Domain.Entities
         public decimal TotalAmount { get; set; }
         public InvoiceStatus Status { get; set; }
         public List<LineItem> LineItems { get; set; } = new();
+        public string BlobUrl {get; set; } = string.Empty;
         public decimal CalculateTotal() => LineItems.Sum(x => x.Amount);
     }
 }
