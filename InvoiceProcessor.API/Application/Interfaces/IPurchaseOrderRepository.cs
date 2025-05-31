@@ -1,5 +1,7 @@
 using InvoiceProcessor.Domain.Entities;
 
+namespace InvoiceProcessor.Application.Interfaces;
+
 public interface IPurchaseOrderRepository
 {
     Task<PurchaseOrder?> GetByPoNumberAsync(string poNumber);

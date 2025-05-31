@@ -1,4 +1,7 @@
 using InvoiceProcessor.Domain.Entities;
+
+namespace InvoiceProcessor.Application.Interfaces;
+
 public interface IInvoiceRepository
 {
     Task<Invoice?> GetByIdAsync(Guid id);

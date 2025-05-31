@@ -1,3 +1,4 @@
+namespace InvoiceProcessor.Application.Interfaces;
 public interface IServiceBusClient
 {
     Task EnqueueDiscrepancyAsync(Guid invoiceId, string reason);

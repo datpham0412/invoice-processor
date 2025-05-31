@@ -1,5 +1,8 @@
 using InvoiceProcessor.Domain.Entities;
 
+namespace InvoiceProcessor.Application.Interfaces;
+
+
 public interface IFormRecognizer
 {
     Task<Invoice> ExtractInvoiceDataAsync(Stream pdfStream);

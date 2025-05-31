@@ -1,3 +1,5 @@
+namespace InvoiceProcessor.Application.Interfaces;
+
 public interface IBlobStorage
 {
     Task<string> UploadAsync(Stream fileStream, string fileName);
