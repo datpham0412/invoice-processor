@@ -1,0 +1,121 @@
+using System;
+using System.Threading.Tasks;
+using Xunit;
+using Moq;
+using InvoiceProcessor.API.Application.Services;
+using InvoiceProcessor.API.Application.Interfaces;
+using InvoiceProcessor.API.Domain.Entities;
+using InvoiceProcessor.API.Domain.Enums;
+using System.Collections.Generic;
+
+namespace InvoiceProcessor.Tests
+{
+    public class MatchingServiceTests
+    {
+        private readonly Mock<IPurchaseOrderRepository> _poRepoMock = new();
+        private readonly Mock<IInvoiceRepository> _invoiceRepoMock = new();
+        private readonly Mock<IExceptionRecordRepository> _exceptionRepoMock = new();
+        private readonly MatchingService _matchingService;
+
+        public MatchingServiceTests()
+        {
+            _matchingService = new MatchingService(
+                _poRepoMock.Object,
+                _invoiceRepoMock.Object,
+                _exceptionRepoMock.Object
+            );
+        }
+
+        [Fact]
+        public async Task MatchInvoiceAsync_ShouldMarkAsMatched_WhenTotalsMatch()
+        {
+            // Arrange
+            var invoice = new Invoice
+            {
+                Id = Guid.NewGuid(),
+                InvoiceNumber = "PO-123",
+                TotalAmount = 100 // This is fine as Invoice has a settable TotalAmount
+            };
+
+            var po = new PurchaseOrder
+            {
+                Id = Guid.NewGuid(),
+                PoNumber = "PO-123",
+                LineItems = new List<POLineItem>
+                {
+                    new POLineItem { Quantity = 2, UnitPrice = 50 } // Total = 100
+                }
+            };
+
+            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.InvoiceNumber))
+                       .ReturnsAsync(po);
+
+            // Act
+            await _matchingService.MatchInvoiceAsync(invoice);
+
+            // Assert
+            Assert.Equal(InvoiceStatus.Matched, invoice.Status);
+            _invoiceRepoMock.Verify(r => r.UpdateAsync(invoice), Times.Once);
+            _invoiceRepoMock.Verify(r => r.SaveChangesAsync(), Times.Once);
+            _exceptionRepoMock.Verify(r => r.AddAsync(It.IsAny<ExceptionRecord>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task MatchInvoiceAsync_ShouldLogException_WhenTotalsDoNotMatch()
+        {
+            // Arrange
+            var invoice = new Invoice
+            {
+                Id = Guid.NewGuid(),
+                InvoiceNumber = "PO-123",
+                TotalAmount = 200
+            };
+
+            var po = new PurchaseOrder
+            {
+                Id = Guid.NewGuid(),
+                PoNumber = "PO-123",
+                LineItems = new List<POLineItem>
+                {
+                    new POLineItem { Quantity = 2, UnitPrice = 50 } 
+                }
+            };
+
+            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.InvoiceNumber))
+                    .ReturnsAsync(po);
+
+            // Act
+            await _matchingService.MatchInvoiceAsync(invoice);
+
+            // Assert
+            Assert.Equal(InvoiceStatus.Discrepancy, invoice.Status);
+            _exceptionRepoMock.Verify(r => r.AddAsync(It.Is<ExceptionRecord>(
+                e => e.InvoiceId == invoice.Id && e.Reason.Contains("Total amount mismatch"))), Times.Once);
+            _invoiceRepoMock.Verify(r => r.UpdateAsync(invoice), Times.Once);
+        }
+
+        [Fact]
+        public async Task MatchInvoiceAsync_ShouldLogException_WhenPurchaseOrderNotFound()
+        {
+            // Arrange
+            var invoice = new Invoice
+            {
+                Id = Guid.NewGuid(),
+                InvoiceNumber = "PO-999",
+                TotalAmount = 100
+            };
+
+            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.InvoiceNumber))
+                       .ReturnsAsync((PurchaseOrder?)null);
+
+            // Act
+            await _matchingService.MatchInvoiceAsync(invoice);
+
+            // Assert
+            _exceptionRepoMock.Verify(r => r.AddAsync(It.Is<ExceptionRecord>(
+                e => e.InvoiceId == invoice.Id && e.Reason.Contains("No matching Purchase Order"))), Times.Once);
+            _invoiceRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Invoice>()), Times.Never);
+        }
+    }
+}
+// This code is a unit test for the MatchingService class in the InvoiceProcessor application.
