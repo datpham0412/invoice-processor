@@ -1,5 +1,5 @@
-using Domain.Enums;
-namespace InvoiceProcessor.Domain.Entities
+using InvoiceProcessor.API.Domain.Enums;
+namespace InvoiceProcessor.API.Domain.Entities
 {
     public class Invoice
     {

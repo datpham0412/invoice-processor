@@ -1,4 +1,4 @@
-namespace InvoiceProcessor.Application.Interfaces;
+namespace InvoiceProcessor.API.Application.Interfaces;
 
 public interface IBlobStorage
 {

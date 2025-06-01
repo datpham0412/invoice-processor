@@ -1,4 +1,4 @@
-namespace Domain.Enums
+namespace InvoiceProcessor.API.Domain.Enums
 {
     public enum InvoiceStatus
     {

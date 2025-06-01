@@ -1,6 +1,5 @@
 using System;
-
-namespace InvoiceProcessor.Domain.Entities
+namespace InvoiceProcessor.API.Domain.Entities
 {
     public class ExceptionRecord
     {

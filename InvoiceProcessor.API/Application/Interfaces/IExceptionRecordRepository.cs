@@ -1,7 +1,5 @@
-using InvoiceProcessor.Domain.Entities;
-
-namespace InvoiceProcessor.Application.Interfaces;
-
+using InvoiceProcessor.API.Domain.Entities;
+namespace InvoiceProcessor.API.Application.Interfaces;
 
 public interface IExceptionRecordRepository
 {

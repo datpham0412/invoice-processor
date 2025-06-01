@@ -1,16 +1,14 @@
 using System.IO;
 using System.Threading.Tasks;
-using InvoiceProcessor.Domain.Entities;
-using InvoiceProcessor.Application.Interfaces;
-
-namespace InvoiceProcessor.Application.Services
+using InvoiceProcessor.API.Domain.Entities;
+using InvoiceProcessor.API.Application.Interfaces;
+namespace InvoiceProcessor.API.Application.Services
 {
     public class UploadInvoiceService
     {
         private readonly IBlobStorage _blobStorage;
         private readonly IFormRecognizer _formRecognizer;
         private readonly IInvoiceRepository _invoiceRepository;
-        private readonly IExceptionRecordRepository _exceptionRecordRepository;
         private readonly MatchingService _matchingService;
 
         public UploadInvoiceService(
@@ -37,7 +35,6 @@ namespace InvoiceProcessor.Application.Services
             await _matchingService.MatchInvoiceAsync(invoice);
 
             return invoice.Id;
-
         }
     }
 }
