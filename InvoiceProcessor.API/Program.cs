@@ -1,3 +1,8 @@
+
+
+using InvoiceProcessor.API.Infrastructure.Storage;
+using InvoiceProcessor.API.Application.Interfaces;
+using InvoiceProcessor.API.Infrastructure.Blob;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +12,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Bind AzureBlobSettings section in appsettings.json to the strongly typed class
+builder.Services.Configure<AzureBlobSettings>(
+    builder.Configuration.GetSection("AzureBlob")
+);
+builder.Services.AddScoped<IBlobStorage, BlobStorageService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
