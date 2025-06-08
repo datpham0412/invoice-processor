@@ -3,6 +3,8 @@
 using InvoiceProcessor.API.Infrastructure.Storage;
 using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Infrastructure.Blob;
+using InvoiceProcessor.API.Infrastructure.OCR;
+using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -17,6 +19,19 @@ builder.Services.Configure<AzureBlobSettings>(
     builder.Configuration.GetSection("AzureBlob")
 );
 builder.Services.AddScoped<IBlobStorage, BlobStorageService>();
+
+builder.Services.Configure<FormRecognizerSettings>(
+    builder.Configuration.GetSection("FormRecognizer")
+);
+builder.Services.AddScoped<IFormRecognizer, FormRecognizerClient>();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
