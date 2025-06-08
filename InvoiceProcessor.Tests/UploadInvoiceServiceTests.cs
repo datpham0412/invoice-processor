@@ -42,25 +42,28 @@ namespace InvoiceProcessor.Tests
             var stream = new MemoryStream(new byte[] { 1, 2, 3 });
             var fileName = "test-invoice.pdf";
             var expectedBlobUrl = "https://blob.storage/test-invoice.pdf";
+
             var extractedInvoice = new Invoice
             {
                 Id = Guid.NewGuid(),
                 InvoiceNumber = "INV-123",
-                TotalAmount = 150
+                TotalAmount = 150,
+                BlobUrl = string.Empty
             };
 
             _blobStorageMock.Setup(b => b.UploadAsync(It.IsAny<Stream>(), fileName))
                             .ReturnsAsync(expectedBlobUrl);
 
             _formRecognizerMock.Setup(f => f.ExtractInvoiceDataAsync(It.IsAny<Stream>()))
-                               .ReturnsAsync(extractedInvoice);
+                            .ReturnsAsync(extractedInvoice);
 
-            // Act
             var result = await _uploadInvoiceService.ProcessUploadAsync(stream, fileName);
 
-            // Assert
-            Assert.Equal(extractedInvoice.Id, result);
-            Assert.Equal(expectedBlobUrl, extractedInvoice.BlobUrl);
+            Assert.NotNull(result);
+            Assert.Equal(extractedInvoice.Id, result.Id);
+            Assert.Equal("INV-123", result.InvoiceNumber);
+            Assert.Equal(150, result.TotalAmount);
+            Assert.Equal(expectedBlobUrl, result.BlobUrl); 
 
             _blobStorageMock.Verify(b => b.UploadAsync(It.IsAny<Stream>(), fileName), Times.Once);
             _formRecognizerMock.Verify(f => f.ExtractInvoiceDataAsync(It.IsAny<Stream>()), Times.Once);

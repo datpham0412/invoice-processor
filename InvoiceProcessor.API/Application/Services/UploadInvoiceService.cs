@@ -22,7 +22,7 @@ namespace InvoiceProcessor.API.Application.Services
             _invoiceRepository = invoiceRepository;
             _matchingService = matchingService;
         }
-        public async Task<Guid> ProcessUploadAsync(Stream pdfStream, string fileName)
+        public async Task<Invoice> ProcessUploadAsync(Stream pdfStream, string fileName)
         {
             var blobUrl = await _blobStorage.UploadAsync(pdfStream, fileName);
             pdfStream.Position = 0;
@@ -34,7 +34,7 @@ namespace InvoiceProcessor.API.Application.Services
 
             await _matchingService.MatchInvoiceAsync(invoice);
 
-            return invoice.Id;
+            return invoice;
         }
     }
 }
