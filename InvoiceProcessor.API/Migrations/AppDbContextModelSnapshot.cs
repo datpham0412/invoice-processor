@@ -53,6 +53,9 @@ namespace InvoiceProcessor.API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("VendorName", "InvoiceNumber")
+                        .IsUnique();
+
                     b.ToTable("Invoices");
                 });
 
