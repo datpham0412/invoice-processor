@@ -1,5 +1,5 @@
-
-
+using InvoiceProcessor.API.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using InvoiceProcessor.API.Infrastructure.Storage;
 using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Infrastructure.Blob;
@@ -30,6 +30,12 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
 
 
 var app = builder.Build();
