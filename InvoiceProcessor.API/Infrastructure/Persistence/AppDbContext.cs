@@ -1,4 +1,3 @@
-
 using InvoiceProcessor.API.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +27,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                       .WithOne()
                       .HasForeignKey(li => li.InvoiceId)
                       .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(i => new { i.VendorName, i.InvoiceNumber }).IsUnique();
             });
 
             modelBuilder.Entity<LineItem>(entity =>
