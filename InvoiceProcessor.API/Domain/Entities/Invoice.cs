@@ -5,6 +5,8 @@ namespace InvoiceProcessor.API.Domain.Entities
     {
         public Guid Id { get; set; }
         public string InvoiceNumber { get; set; } = string.Empty;
+        public string? PoNumber { get; set; }
+
         public string VendorName { get; set; } = string.Empty;
         public DateTime InvoiceDate { get; set; }
         public decimal TotalAmount { get; set; }
