@@ -40,6 +40,10 @@ namespace InvoiceProcessor.API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("PoNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -88,6 +92,65 @@ namespace InvoiceProcessor.API.Migrations
                     b.ToTable("LineItems");
                 });
 
+            modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.POLineItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PurchaseOrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.ToTable("POLineItem");
+                });
+
+            modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.PurchaseOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("IssueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PoNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("VendorName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PoNumber")
+                        .IsUnique();
+
+                    b.ToTable("PurchaseOrders");
+                });
+
             modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.LineItem", b =>
                 {
                     b.HasOne("InvoiceProcessor.API.Domain.Entities.Invoice", null)
@@ -97,7 +160,23 @@ namespace InvoiceProcessor.API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.POLineItem", b =>
+                {
+                    b.HasOne("InvoiceProcessor.API.Domain.Entities.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("LineItems")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseOrder");
+                });
+
             modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.Invoice", b =>
+                {
+                    b.Navigation("LineItems");
+                });
+
+            modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.PurchaseOrder", b =>
                 {
                     b.Navigation("LineItems");
                 });
