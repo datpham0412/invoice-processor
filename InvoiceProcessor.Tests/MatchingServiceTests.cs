@@ -7,6 +7,7 @@ using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Domain.Entities;
 using InvoiceProcessor.API.Domain.Enums;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace InvoiceProcessor.Tests
 {
@@ -34,18 +35,20 @@ namespace InvoiceProcessor.Tests
             {
                 Id = Guid.NewGuid(),
                 InvoiceNumber = "PO-123",
-                TotalAmount = 100 // This is fine as Invoice has a settable TotalAmount
+                TotalAmount = 100
             };
 
+            var lineItem = new POLineItem { Quantity = 2, UnitPrice = 50 };
             var po = new PurchaseOrder
             {
                 Id = Guid.NewGuid(),
                 PoNumber = "PO-123",
-                LineItems = new List<POLineItem>
-                {
-                    new POLineItem { Quantity = 2, UnitPrice = 50 } // Total = 100
-                }
+                LineItems = new List<POLineItem> { lineItem }
             };
+
+            // Calculate the total amount for the PO
+            lineItem.Amount = lineItem.Quantity * lineItem.UnitPrice;
+            po.TotalAmount = po.LineItems.Sum(li => li.Amount);
 
             _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.InvoiceNumber))
                        .ReturnsAsync(po);
@@ -71,15 +74,17 @@ namespace InvoiceProcessor.Tests
                 TotalAmount = 200
             };
 
+            var lineItem = new POLineItem { Quantity = 2, UnitPrice = 50 };
             var po = new PurchaseOrder
             {
                 Id = Guid.NewGuid(),
                 PoNumber = "PO-123",
-                LineItems = new List<POLineItem>
-                {
-                    new POLineItem { Quantity = 2, UnitPrice = 50 } 
-                }
+                LineItems = new List<POLineItem> { lineItem }
             };
+
+            // Calculate the total amount for the PO
+            lineItem.Amount = lineItem.Quantity * lineItem.UnitPrice;
+            po.TotalAmount = po.LineItems.Sum(li => li.Amount);
 
             _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.InvoiceNumber))
                     .ReturnsAsync(po);
