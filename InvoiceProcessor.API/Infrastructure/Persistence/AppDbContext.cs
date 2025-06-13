@@ -11,6 +11,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
         public DbSet<Invoice>? Invoices { get; set; }
         public DbSet<LineItem>? LineItems { get; set; }
         public DbSet<PurchaseOrder>? PurchaseOrders { get; set; }
+        public DbSet<ExceptionRecord>? ExceptionRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
