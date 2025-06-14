@@ -9,6 +9,6 @@ namespace InvoiceProcessor.API.Domain.Entities
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal Amount { get; set; }
-        public virtual PurchaseOrder PurchaseOrder { get; set; } = new();
+        public virtual PurchaseOrder? PurchaseOrder { get; set; }
     }
 }
