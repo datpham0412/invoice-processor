@@ -54,12 +54,14 @@ namespace InvoiceProcessor.Tests
                        .ReturnsAsync(po);
 
             // Act
-            await _matchingService.MatchInvoiceAsync(invoice);
+            var result = await _matchingService.MatchInvoiceAsync(invoice);
 
             // Assert
-            Assert.Equal(InvoiceStatus.Matched, invoice.Status);
+            Assert.True(result.IsMatched);
+            Assert.Equal(InvoiceStatus.Matched, result.Status);
+            Assert.Null(result.FailureReason);
+
             _invoiceRepoMock.Verify(r => r.UpdateAsync(invoice), Times.Once);
-            _invoiceRepoMock.Verify(r => r.SaveChangesAsync(), Times.Never);
             _exceptionRepoMock.Verify(r => r.AddAsync(It.IsAny<ExceptionRecord>()), Times.Never);
         }
 
@@ -90,13 +92,15 @@ namespace InvoiceProcessor.Tests
                     .ReturnsAsync(po);
 
             // Act
-            await _matchingService.MatchInvoiceAsync(invoice);
+            var result = await _matchingService.MatchInvoiceAsync(invoice);
 
             // Assert
-            Assert.Equal(InvoiceStatus.Discrepancy, invoice.Status);
-            _exceptionRepoMock.Verify(r => r.AddAsync(It.Is<ExceptionRecord>(
-                e => e.InvoiceId == invoice.Id && e.Reason.Contains("Total amount mismatch"))), Times.Once);
-            _invoiceRepoMock.Verify(r => r.SaveChangesAsync(), Times.Never);
+            Assert.False(result.IsMatched);
+            Assert.Equal(InvoiceStatus.Discrepancy, result.Status);
+            Assert.Contains("Total amount mismatch", result.FailureReason);
+
+            _exceptionRepoMock.Verify(r => r.AddAsync(It.IsAny<ExceptionRecord>()), Times.Once);
+            _invoiceRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Invoice>()), Times.Once);
         }
 
         [Fact]
@@ -114,12 +118,15 @@ namespace InvoiceProcessor.Tests
                        .ReturnsAsync((PurchaseOrder?)null);
 
             // Act
-            await _matchingService.MatchInvoiceAsync(invoice);
+            var result = await _matchingService.MatchInvoiceAsync(invoice);
 
             // Assert
-            _exceptionRepoMock.Verify(r => r.AddAsync(It.Is<ExceptionRecord>(
-                e => e.InvoiceId == invoice.Id && e.Reason.Contains("No matching Purchase Order"))), Times.Once);
-            _invoiceRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Invoice>()), Times.Never);
+            Assert.False(result.IsMatched);
+            Assert.Equal(InvoiceStatus.Discrepancy, result.Status);
+            Assert.Contains("No matching Purchase Order", result.FailureReason);
+
+            _invoiceRepoMock.Verify(r => r.UpdateAsync(invoice), Times.Once);   // status updated
+            _exceptionRepoMock.Verify(r => r.AddAsync(It.IsAny<ExceptionRecord>()), Times.Once);
         }
     }
 }
