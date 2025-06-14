@@ -20,20 +20,38 @@ namespace InvoiceProcessor.API.Application.Services
         }
         public async Task MatchInvoiceAsync(Invoice invoice)
         {
-            var purchaseOrder = await _poRepository.GetByPoNumberAsync(invoice.InvoiceNumber);
+            if (string.IsNullOrWhiteSpace(invoice.PoNumber))
+            {
+                await _exceptionRecordRepository.AddAsync(new ExceptionRecord
+                {
+                    InvoiceId = invoice.Id,
+                    Reason    = "No PO number detected on invoice",
+                    Timestamp = DateTime.UtcNow
+                });
+                await _exceptionRecordRepository.SaveChangesAsync();
+
+                invoice.Status = InvoiceStatus.Discrepancy;
+                await _invoiceRepository.UpdateAsync(invoice);
+                
+                return;
+            }
+            var purchaseOrder = await _poRepository.GetByPoNumberAsync(invoice.PoNumber);
+
             if (purchaseOrder == null)
             {
                 await _exceptionRecordRepository.AddAsync(new ExceptionRecord
                 {
                     InvoiceId = invoice.Id,
-                    Reason = $"No matching Purchase Order found for Invoice {invoice.InvoiceNumber}",
+                    Reason    = $"No matching Purchase Order found for PO {invoice.PoNumber}",
                     Timestamp = DateTime.UtcNow
                 });
                 await _exceptionRecordRepository.SaveChangesAsync();
                 return;
             }
-            var poTotal = purchaseOrder.TotalAmount;
+
+            var poTotal      = purchaseOrder.TotalAmount;
             var invoiceTotal = invoice.TotalAmount;
+
             if (poTotal == invoiceTotal)
             {
                 invoice.Status = InvoiceStatus.Matched;
@@ -43,14 +61,13 @@ namespace InvoiceProcessor.API.Application.Services
                 await _exceptionRecordRepository.AddAsync(new ExceptionRecord
                 {
                     InvoiceId = invoice.Id,
-                    Reason = $"Total amount mismatch: PO Total {poTotal}, Invoice Total {invoiceTotal}",
+                    Reason    = $"Total amount mismatch: PO={poTotal}, Invoice={invoiceTotal}",
                     Timestamp = DateTime.UtcNow
                 });
                 invoice.Status = InvoiceStatus.Discrepancy;
             }
+
             await _invoiceRepository.UpdateAsync(invoice);
-            await _invoiceRepository.SaveChangesAsync();
         }
-        
     }
 }
