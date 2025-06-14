@@ -28,7 +28,6 @@ namespace InvoiceProcessor.API.Application.Services
                     Reason    = "No PO number detected on invoice",
                     Timestamp = DateTime.UtcNow
                 });
-                await _exceptionRecordRepository.SaveChangesAsync();
 
                 invoice.Status = InvoiceStatus.Discrepancy;
                 await _invoiceRepository.UpdateAsync(invoice);
@@ -45,7 +44,6 @@ namespace InvoiceProcessor.API.Application.Services
                     Reason    = $"No matching Purchase Order found for PO {invoice.PoNumber}",
                     Timestamp = DateTime.UtcNow
                 });
-                await _exceptionRecordRepository.SaveChangesAsync();
                 return;
             }
 
