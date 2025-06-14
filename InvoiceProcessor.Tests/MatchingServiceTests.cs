@@ -105,17 +105,17 @@ namespace InvoiceProcessor.Tests
         }
 
         [Fact]
-        public async Task MatchInvoiceAsync_ShouldLogException_WhenPurchaseOrderNotFound()
+        public async Task MatchInvoiceAsync_ShouldReturnUnmatchedNoPO_WhenPoMissing()
         {
             // Arrange
             var invoice = new Invoice
             {
                 Id = Guid.NewGuid(),
-                PoNumber = "PO-999",
+                PoNumber = string.Empty,
                 TotalAmount = 100
             };
 
-            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.PoNumber))
+            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(It.IsAny<string>()))
                        .ReturnsAsync((PurchaseOrder?)null);
 
             // Act
@@ -123,8 +123,8 @@ namespace InvoiceProcessor.Tests
 
             // Assert
             Assert.False(result.IsMatched);
-            Assert.Equal(InvoiceStatus.Discrepancy, result.Status);
-            Assert.Contains("No matching Purchase Order", result.FailureReason);
+            Assert.Equal(InvoiceStatus.UnmatchedNoPO, result.Status);
+            Assert.Contains("PO number missing", result.FailureReason);
 
             _invoiceRepoMock.Verify(r => r.UpdateAsync(invoice), Times.Once);   // status updated
             _exceptionRepoMock.Verify(r => r.AddAsync(It.IsAny<ExceptionRecord>()), Times.Once);
