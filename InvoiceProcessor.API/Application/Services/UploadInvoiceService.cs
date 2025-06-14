@@ -30,9 +30,8 @@ namespace InvoiceProcessor.API.Application.Services
             invoice.BlobUrl = blobUrl;
 
             await _invoiceRepository.AddAsync(invoice);
-            await _invoiceRepository.SaveChangesAsync();
-
             await _matchingService.MatchInvoiceAsync(invoice);
+            await _invoiceRepository.SaveChangesAsync();
 
             return invoice;
         }
