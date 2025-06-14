@@ -6,11 +6,11 @@ using InvoiceProcessor.API.Infrastructure.Blob;
 using InvoiceProcessor.API.Infrastructure.OCR;
 using System.Text.Json.Serialization;
 using InvoiceProcessor.API.Infrastructure.Repositories;
+using InvoiceProcessor.API.Application.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -38,6 +38,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<IExceptionRecordRepository, ExceptionRecordRepository>();
+builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();   
+builder.Services.AddScoped<UploadInvoiceService>();
+builder.Services.AddScoped<MatchingService>();
+
 
 var app = builder.Build();
 
