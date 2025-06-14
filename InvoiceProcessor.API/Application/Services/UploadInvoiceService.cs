@@ -24,6 +24,8 @@ namespace InvoiceProcessor.API.Application.Services
         }
         public async Task<Invoice> ProcessUploadAsync(Stream pdfStream, string fileName)
         {
+            using (pdfStream)
+            {
             var blobUrl = await _blobStorage.UploadAsync(pdfStream, fileName);
             pdfStream.Position = 0;
             var invoice = await _formRecognizer.ExtractInvoiceDataAsync(pdfStream);
@@ -33,7 +35,8 @@ namespace InvoiceProcessor.API.Application.Services
             await _matchingService.MatchInvoiceAsync(invoice);
             await _invoiceRepository.SaveChangesAsync();
 
-            return invoice;
+            return invoice;   
+            }
         }
     }
 }
