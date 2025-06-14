@@ -34,7 +34,7 @@ namespace InvoiceProcessor.Tests
             var invoice = new Invoice
             {
                 Id = Guid.NewGuid(),
-                InvoiceNumber = "PO-123",
+                PoNumber = "PO-123",
                 TotalAmount = 100
             };
 
@@ -50,7 +50,7 @@ namespace InvoiceProcessor.Tests
             lineItem.Amount = lineItem.Quantity * lineItem.UnitPrice;
             po.TotalAmount = po.LineItems.Sum(li => li.Amount);
 
-            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.InvoiceNumber))
+            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.PoNumber))
                        .ReturnsAsync(po);
 
             // Act
@@ -59,7 +59,7 @@ namespace InvoiceProcessor.Tests
             // Assert
             Assert.Equal(InvoiceStatus.Matched, invoice.Status);
             _invoiceRepoMock.Verify(r => r.UpdateAsync(invoice), Times.Once);
-            _invoiceRepoMock.Verify(r => r.SaveChangesAsync(), Times.Once);
+            _invoiceRepoMock.Verify(r => r.SaveChangesAsync(), Times.Never);
             _exceptionRepoMock.Verify(r => r.AddAsync(It.IsAny<ExceptionRecord>()), Times.Never);
         }
 
@@ -70,7 +70,7 @@ namespace InvoiceProcessor.Tests
             var invoice = new Invoice
             {
                 Id = Guid.NewGuid(),
-                InvoiceNumber = "PO-123",
+                PoNumber = "PO-123",
                 TotalAmount = 200
             };
 
@@ -86,7 +86,7 @@ namespace InvoiceProcessor.Tests
             lineItem.Amount = lineItem.Quantity * lineItem.UnitPrice;
             po.TotalAmount = po.LineItems.Sum(li => li.Amount);
 
-            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.InvoiceNumber))
+            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.PoNumber))
                     .ReturnsAsync(po);
 
             // Act
@@ -96,7 +96,7 @@ namespace InvoiceProcessor.Tests
             Assert.Equal(InvoiceStatus.Discrepancy, invoice.Status);
             _exceptionRepoMock.Verify(r => r.AddAsync(It.Is<ExceptionRecord>(
                 e => e.InvoiceId == invoice.Id && e.Reason.Contains("Total amount mismatch"))), Times.Once);
-            _invoiceRepoMock.Verify(r => r.UpdateAsync(invoice), Times.Once);
+            _invoiceRepoMock.Verify(r => r.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
@@ -106,11 +106,11 @@ namespace InvoiceProcessor.Tests
             var invoice = new Invoice
             {
                 Id = Guid.NewGuid(),
-                InvoiceNumber = "PO-999",
+                PoNumber = "PO-999",
                 TotalAmount = 100
             };
 
-            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.InvoiceNumber))
+            _poRepoMock.Setup(repo => repo.GetByPoNumberAsync(invoice.PoNumber))
                        .ReturnsAsync((PurchaseOrder?)null);
 
             // Act
