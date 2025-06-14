@@ -99,13 +99,6 @@ namespace InvoiceProcessor.API.Application.Services
                     FailureReason = reason
                 };
             }
-
-            await _invoiceRepository.UpdateAsync(invoice);
-            return new MatchResult
-            {
-                IsMatched = invoice.Status == InvoiceStatus.Matched,
-                Status = invoice.Status,
-            };
         }
     }
 }
