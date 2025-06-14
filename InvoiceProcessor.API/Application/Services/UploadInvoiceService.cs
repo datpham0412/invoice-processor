@@ -29,6 +29,13 @@ namespace InvoiceProcessor.API.Application.Services
             var blobUrl = await _blobStorage.UploadAsync(pdfStream, fileName);
             pdfStream.Position = 0;
             var invoice = await _formRecognizer.ExtractInvoiceDataAsync(pdfStream);
+            if (string.IsNullOrWhiteSpace(invoice.InvoiceNumber) &&
+                string.IsNullOrWhiteSpace(invoice.VendorName) &&
+                invoice.TotalAmount <= 0)
+            {
+                throw new InvalidOperationException("OCR failed to extract invoice details. Invoice not saved.");
+            }
+
             invoice.BlobUrl = blobUrl;
 
             await _invoiceRepository.AddAsync(invoice);
