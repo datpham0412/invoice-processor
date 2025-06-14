@@ -65,6 +65,21 @@ namespace InvoiceProcessor.API.Application.Services
             if (poTotal == invoiceTotal)
             {
                 invoice.Status = InvoiceStatus.Matched;
+
+                await _exceptionRecordRepository.AddAsync(new ExceptionRecord
+                {
+                    InvoiceId = invoice.Id,
+                    Reason = $"Invoice successfully matched with PO {invoice.PoNumber}",
+                    Timestamp = DateTime.UtcNow
+                });
+
+                await _invoiceRepository.UpdateAsync(invoice);
+
+                return new MatchResult
+                {
+                    IsMatched = true,
+                    Status = invoice.Status
+                };
             }
             else
             {
