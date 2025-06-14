@@ -23,7 +23,7 @@ namespace InvoiceProcessor.API.Application.Services
         {
             if (string.IsNullOrWhiteSpace(invoice.PoNumber))
             {
-                var reason = "No PO number detected on invoice";
+                var reason = "PO number missing — unable to match invoice automatically";
                 await _exceptionRecordRepository.AddAsync(new ExceptionRecord
                 {
                     InvoiceId = invoice.Id,
@@ -31,7 +31,7 @@ namespace InvoiceProcessor.API.Application.Services
                     Timestamp = DateTime.UtcNow
                 });
 
-                invoice.Status = InvoiceStatus.Discrepancy;
+                invoice.Status = InvoiceStatus.UnmatchedNoPO;
                 await _invoiceRepository.UpdateAsync(invoice);
 
                 return new MatchResult
