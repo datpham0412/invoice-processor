@@ -30,6 +30,11 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                       .WithOne()
                       .HasForeignKey(li => li.InvoiceId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(i => i.ExceptionRecords)                          
+                    .WithOne(er => er.Invoice)
+                    .HasForeignKey(er => er.InvoiceId)
+                    .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(i => new { i.VendorName, i.InvoiceNumber }).IsUnique();
             });
 
@@ -66,6 +71,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                 entity.Property(li => li.UnitPrice).HasColumnType("decimal(18,2)");
                 entity.Property(li => li.Amount).HasColumnType("decimal(18,2)");
             });
+            
         }
     }
 }
