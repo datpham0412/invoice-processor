@@ -62,7 +62,8 @@ namespace InvoiceProcessor.Tests
             Assert.Null(result.FailureReason);
 
             _invoiceRepoMock.Verify(r => r.UpdateAsync(invoice), Times.Once);
-            _exceptionRepoMock.Verify(r => r.AddAsync(It.IsAny<ExceptionRecord>()), Times.Never);
+            _exceptionRepoMock.Verify(r => r.AddAsync(It.Is<ExceptionRecord>(
+                er => er.Reason.Contains("successfully matched"))), Times.Once);
         }
 
         [Fact]
