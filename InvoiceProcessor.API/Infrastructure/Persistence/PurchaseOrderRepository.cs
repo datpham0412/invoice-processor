@@ -31,6 +31,18 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                 .FirstOrDefaultAsync(po => po.PoNumber == poNumber);
         }
 
+        public async Task<PurchaseOrder?> GetByPoNumberAsync(string invoiceNumber, string vendorName)
+        {
+            return await _context.PurchaseOrders!
+                .Include(po => po.LineItems)
+                .FirstOrDefaultAsync(po => po.PoNumber == invoiceNumber && po.VendorName == vendorName);
+        }
+        public async Task<PurchaseOrder?> GetByInvoiceNumberOnlyAsync(string invoiceNumber)
+        {
+            return await _context.PurchaseOrders!
+                .FirstOrDefaultAsync(po => po.PoNumber == invoiceNumber);
+        }
+
         public async Task<List<PurchaseOrder>> GetAllAsync()
         {
             return await _context.PurchaseOrders!.ToListAsync();
