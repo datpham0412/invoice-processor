@@ -31,5 +31,18 @@ public class PurchaseOrderController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+    [HttpGet("{poNumber}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PurchaseOrderResponse>> GetByPoNumber(string poNumber)
+    {
+        var existing = await _createService.GetByPoNumberAsync(poNumber);
+        if (existing == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(existing);
+    }
 }
 
