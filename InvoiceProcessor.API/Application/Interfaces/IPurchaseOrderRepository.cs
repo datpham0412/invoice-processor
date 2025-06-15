@@ -3,6 +3,8 @@ namespace InvoiceProcessor.API.Application.Interfaces;
 public interface IPurchaseOrderRepository
 {
     Task<PurchaseOrder?> GetByPoNumberAsync(string poNumber);
+    Task<PurchaseOrder?> GetByPoNumberAsync(string invoiceNumber, string vendorName);
+    Task<PurchaseOrder?> GetByInvoiceNumberOnlyAsync(string invoiceNumber);
     Task<List<PurchaseOrder>> GetAllAsync();
     Task AddAsync(PurchaseOrder purchaseOrder);
     Task UpdateAsync(PurchaseOrder purchaseOrder);
