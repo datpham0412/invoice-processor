@@ -5,6 +5,9 @@ namespace InvoiceProcessor.API.Domain.Enums
         Pending = 0,
         Matched = 1,
         Discrepancy = 2,
-        UnmatchedNoPO = 3
+        UnmatchedNoPO = 3,
+        MatchedByInvoiceNumber = 4,
+        FallbackVendorMismatch = 5,
+        FallbackInvoiceNotFound = 6
     }
 }
