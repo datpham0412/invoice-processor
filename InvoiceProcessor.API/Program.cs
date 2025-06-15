@@ -41,6 +41,7 @@ builder.Services.AddScoped<IExceptionRecordRepository, ExceptionRecordRepository
 builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();   
 builder.Services.AddScoped<UploadInvoiceService>();
 builder.Services.AddScoped<MatchingService>();
+builder.Services.AddScoped<CreatePurchaseOrderService>();
 
 
 var app = builder.Build();
