@@ -27,6 +27,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
         public async Task<PurchaseOrder?> GetByPoNumberAsync(string poNumber)
         {
             return await _context.PurchaseOrders!
+                .Include(po => po.LineItems)
                 .FirstOrDefaultAsync(po => po.PoNumber == poNumber);
         }
 
