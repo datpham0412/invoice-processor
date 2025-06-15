@@ -1,6 +1,7 @@
 using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Domain.Entities;
 using InvoiceProcessor.API.Infrastructure.Persistence;
+using InvoiceProcessor.API.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceProcessor.API.Infrastructure.Repositories{
@@ -27,11 +28,12 @@ namespace InvoiceProcessor.API.Infrastructure.Repositories{
         }
         public async Task AddAsync(Invoice invoice)
         {
-            var exists = await _context.Invoices!
-                .AnyAsync(i => i.VendorName == invoice.VendorName && i.InvoiceNumber == invoice.InvoiceNumber);
+            bool exists = await _context.Invoices!
+            .AnyAsync(i => i.VendorName == invoice.VendorName &&
+                        i.InvoiceNumber == invoice.InvoiceNumber);
             if (exists)
             {
-                throw new InvalidOperationException("Invoice already exists.");
+                throw new DuplicateInvoiceException(invoice.VendorName, invoice.InvoiceNumber);
             }
 
             await _context.Invoices!.AddAsync(invoice);
