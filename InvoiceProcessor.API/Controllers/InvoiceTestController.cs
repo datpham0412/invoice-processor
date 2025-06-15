@@ -9,6 +9,7 @@ using InvoiceProcessor.API.Domain.Exceptions;
 namespace InvoiceProcessor.API.Controllers;
 [ApiController]
 [Route("api/invoices")]
+[Produces("application/json")]
 public class InvoiceUploadController : ControllerBase
 {
     private readonly UploadInvoiceService _uploadService;
@@ -28,7 +29,7 @@ public class InvoiceUploadController : ControllerBase
     public async Task<ActionResult<UploadInvoiceResponse>> Upload(IFormFile file)
     {
         if (file is null || file.Length == 0)
-            return BadRequest("Please upload a non-empty PDF.");
+            return BadRequest(new { message = "Please upload a non-empty PDF." });
 
         await using var stream = file.OpenReadStream();
 
@@ -41,19 +42,19 @@ public class InvoiceUploadController : ControllerBase
                 InvoiceId     = invoice.Id,
                 Status        = invoice.Status,
                 BlobUrl       = invoice.BlobUrl,
-                FailureReason = invoice.Status == InvoiceStatus.Discrepancy
-                                    ? invoice.ExceptionRecords.FirstOrDefault()?.Reason
-                                    : null
+                FailureReason = invoice.ExceptionRecords?.FirstOrDefault()?.Reason
             };
 
             return Ok(response);
         }
         catch (DuplicateInvoiceException ex)
         {
+            // Console.WriteLine($"Duplicate invoice: {ex.Message}");
             return Conflict(new { message = ex.Message }); // 409 Conflict
         }
         catch (InvalidOperationException ex)
         {
+            // Console.WriteLine($"Invalid operation: {ex.Message}");
             return BadRequest(new { message = ex.Message }); // OCR failure etc.
         }
     }
