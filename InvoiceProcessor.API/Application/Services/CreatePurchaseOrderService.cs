@@ -12,6 +12,27 @@ namespace InvoiceProcessor.API.Application.Services
         {
             _purchaseOrderRepository = purchaseOrderRepository;
         }
+        public async Task<PurchaseOrderResponse?> GetByPoNumberAsync(string poNumber)
+        {
+            var po = await _purchaseOrderRepository.GetByPoNumberAsync(poNumber);
+            if (po == null) return null;
+
+            return new PurchaseOrderResponse
+            {
+                Id = po.Id,
+                PoNumber = po.PoNumber,
+                VendorName = po.VendorName,
+                IssueDate = po.IssueDate,
+                TotalAmount = po.TotalAmount,
+                LineItems = po.LineItems.Select(li => new PurchaseOrderLineItemResponse
+                {
+                    Description = li.Description,
+                    Quantity = li.Quantity,
+                    UnitPrice = li.UnitPrice,
+                    Amount = li.Amount
+                }).ToList()
+            };
+        }
 
         public async Task<PurchaseOrderResponse> CreateAsync(CreatePurchaseOrderRequest request)
         {
