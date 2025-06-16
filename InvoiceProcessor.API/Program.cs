@@ -7,13 +7,50 @@ using InvoiceProcessor.API.Infrastructure.OCR;
 using System.Text.Json.Serialization;
 using InvoiceProcessor.API.Infrastructure.Repositories;
 using InvoiceProcessor.API.Application.Services;
+using InvoiceProcessor.API.Infrastructure.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Invoice Processor API",
+        Version = "v1"
+    });
+
+    // ✅ Add JWT support to Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+    Type = SecuritySchemeType.Http,   // 👈 switch from ApiKey → Http
+    Scheme = "Bearer",
+    BearerFormat = "JWT",
+    In = ParameterLocation.Header,
+    Description = "Paste only the token below; “Bearer ” will be added automatically."
+});
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Bind AzureBlobSettings section in appsettings.json to the strongly typed class
 builder.Services.Configure<AzureBlobSettings>(
@@ -51,6 +88,27 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+var jwtSettings = builder.Configuration
+    .GetSection("Jwt")
+    .Get<JwtSettings>();
+
+builder.Services.AddSingleton(jwtSettings);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings.Key))
+        };
+    });
 
 var app = builder.Build();
 
@@ -62,7 +120,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();   
 app.UseAuthorization();
 
 app.MapControllers();
