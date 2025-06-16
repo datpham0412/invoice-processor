@@ -30,6 +30,7 @@ public class PurchaseOrderRepositoryTests
             PoNumber = "PO-001",
             VendorName = "Acme Corp",
             IssueDate = DateTime.UtcNow,
+            UserId = "userA",
             LineItems =
             {
                 new POLineItem { Id = Guid.NewGuid(), Quantity = 2, UnitPrice = 50 },
@@ -59,7 +60,8 @@ public class PurchaseOrderRepositoryTests
             PoNumber = "PO-123",
             VendorName = "Acme",
             IssueDate = DateTime.UtcNow,
-            TotalAmount = 10
+            TotalAmount = 10,
+            UserId = "userA"
         });
         await ctx.SaveChangesAsync();
 
@@ -83,7 +85,8 @@ public class PurchaseOrderRepositoryTests
                 PoNumber = "PO-X",
                 VendorName = "Old",
                 IssueDate = DateTime.UtcNow,
-                TotalAmount = 1
+                TotalAmount = 1,
+                UserId = "userA"
             });
             await ctx.SaveChangesAsync();
         }
@@ -116,7 +119,8 @@ public class PurchaseOrderRepositoryTests
                 PoNumber = "PO-Z",
                 VendorName = "RemoveMe",
                 IssueDate = DateTime.UtcNow,
-                TotalAmount = 5
+                TotalAmount = 5,
+                UserId = "userA"
             });
             await ctx.SaveChangesAsync();
         }
