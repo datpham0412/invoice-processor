@@ -36,14 +36,16 @@ public class ExceptionRecordRepositoryTests
                 Id = Guid.NewGuid(),
                 InvoiceNumber = "INV-001",
                 VendorName = "Test Vendor",
-                Status = InvoiceStatus.Pending
+                Status = InvoiceStatus.Pending,
+                UserId = "userA"
             };
             var invoice2 = new Invoice 
             { 
                 Id = Guid.NewGuid(),
                 InvoiceNumber = "INV-002",
                 VendorName = "Test Vendor",
-                Status = InvoiceStatus.Pending
+                Status = InvoiceStatus.Pending,
+                UserId = "userA"
             };
 
             ctx.Invoices!.Add(invoice1);
