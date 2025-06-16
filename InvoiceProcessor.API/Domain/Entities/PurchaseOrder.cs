@@ -11,5 +11,7 @@ namespace InvoiceProcessor.API.Domain.Entities
         public DateTime IssueDate { get; set; }
         public List<POLineItem> LineItems { get; set; } = new();
         public decimal TotalAmount { get; set; }
+        public string UserId { get; set; } = default!;
+        public AppUser User { get; set; } = default!;
     }
 }
