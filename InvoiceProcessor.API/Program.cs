@@ -42,6 +42,17 @@ builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
 builder.Services.AddScoped<UploadInvoiceService>();
 builder.Services.AddScoped<MatchingService>();
 builder.Services.AddScoped<CreatePurchaseOrderService>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+
 
 
 var app = builder.Build();
@@ -58,5 +69,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseCors();
 
 app.Run();
