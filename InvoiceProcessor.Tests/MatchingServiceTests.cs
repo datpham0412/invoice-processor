@@ -38,7 +38,8 @@ namespace InvoiceProcessor.Tests
                 Id         = Guid.NewGuid(),
                 PoNumber   = "PO-123",
                 VendorName = "Acme",
-                TotalAmount= 100
+                TotalAmount= 100,
+                UserId     = "userA"
             };
 
             var poLine = new POLineItem { Quantity = 2, UnitPrice = 50, Amount = 100 };
@@ -48,7 +49,8 @@ namespace InvoiceProcessor.Tests
                 PoNumber   = "PO-123",
                 VendorName = "Acme",
                 LineItems  = new List<POLineItem> { poLine },
-                TotalAmount= 100
+                TotalAmount= 100,
+                UserId     = "userA"
             };
 
             _poRepo.Setup(r => r.GetByPoNumberAsync(invoice.PoNumber))
@@ -78,7 +80,8 @@ namespace InvoiceProcessor.Tests
                 Id         = Guid.NewGuid(),
                 PoNumber   = "PO-123",
                 VendorName = "Acme",
-                TotalAmount= 200
+                TotalAmount= 200,
+                UserId     = "userA"
             };
 
             var poLine = new POLineItem { Quantity = 2, UnitPrice = 50, Amount = 100 };
@@ -88,7 +91,8 @@ namespace InvoiceProcessor.Tests
                 PoNumber    = "PO-123",
                 VendorName  = "Acme",
                 LineItems   = new List<POLineItem> { poLine },
-                TotalAmount = 100
+                TotalAmount = 100,
+                UserId      = "userA"
             };
 
             _poRepo.Setup(r => r.GetByPoNumberAsync(invoice.PoNumber))
@@ -116,7 +120,8 @@ namespace InvoiceProcessor.Tests
                 PoNumber      = null,
                 InvoiceNumber = "INV-900",
                 VendorName    = "Acme",
-                TotalAmount   = 80
+                TotalAmount   = 80,
+                UserId        = "userA"
             };
 
             _poRepo.Setup(r => r.GetByPoNumberAsync(
@@ -145,7 +150,8 @@ namespace InvoiceProcessor.Tests
                 PoNumber      = null,
                 InvoiceNumber = "INV-900",
                 VendorName    = "Acme",
-                TotalAmount   = 60
+                TotalAmount   = 60,
+                UserId        = "userA"
             };
 
             var poLine = new POLineItem { Quantity = 3, UnitPrice = 20, Amount = 60 };
@@ -155,7 +161,8 @@ namespace InvoiceProcessor.Tests
                 PoNumber    = "INV-900",   // vendor uses Invoice# as PO#
                 VendorName  = "Acme",
                 LineItems   = new List<POLineItem> { poLine },
-                TotalAmount = 60
+                TotalAmount = 60,
+                UserId      = "userA"
             };
 
             _poRepo.Setup(r => r.GetByPoNumberAsync(
