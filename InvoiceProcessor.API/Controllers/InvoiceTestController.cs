@@ -5,6 +5,8 @@ using InvoiceProcessor.API.Application.Models;    // <- MatchResult DTO
 using InvoiceProcessor.API.Domain.Enums;
 using InvoiceProcessor.API.Domain.Entities;
 using InvoiceProcessor.API.Domain.Exceptions;
+using InvoiceProcessor.API.Application.Interfaces;
+using System.IO;
 
 namespace InvoiceProcessor.API.Controllers;
 [ApiController]
@@ -13,10 +15,14 @@ namespace InvoiceProcessor.API.Controllers;
 public class InvoiceUploadController : ControllerBase
 {
     private readonly UploadInvoiceService _uploadService;
+    private readonly IBlobStorage _blobStorage;
 
-    public InvoiceUploadController(UploadInvoiceService uploadService)
+    public InvoiceUploadController(
+        UploadInvoiceService uploadService,
+        IBlobStorage blobStorage)
     {
         _uploadService = uploadService;
+        _blobStorage = blobStorage;
     }
 
     /// <summary>Uploads a PDF and returns both the Invoice and the MatchResult.</summary>
@@ -39,9 +45,13 @@ public class InvoiceUploadController : ControllerBase
 
             var response = new UploadInvoiceResponse
             {
-                InvoiceId     = invoice.Id,
-                Status        = invoice.Status,
-                BlobUrl       = invoice.BlobUrl,
+                InvoiceId = invoice.Id,
+                Status = invoice.Status,
+                BlobUrl = Url.Action(
+                    nameof(Download),
+                    "InvoiceUpload",
+                    new { fileName = Path.GetFileName(invoice.BlobUrl) },
+                    Request.Scheme),
                 FailureReason = invoice.ExceptionRecords?.FirstOrDefault()?.Reason
             };
 
@@ -56,6 +66,29 @@ public class InvoiceUploadController : ControllerBase
         {
             // Console.WriteLine($"Invalid operation: {ex.Message}");
             return BadRequest(new { message = ex.Message }); // OCR failure etc.
+        }
+    }
+
+    /// <summary>Downloads a PDF file by its name.</summary>
+    /// <param name="fileName">The name of the file to download</param>
+    /// <returns>The PDF file</returns>
+    /// <response code="200">Returns the PDF file</response>
+    /// <response code="404">If the file is not found</response>
+    [HttpGet("file/{fileName}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Download(string fileName)
+    {
+        try
+        {
+            var stream = await _blobStorage.DownloadAsync(fileName);
+
+            Response.Headers.ContentDisposition = $"inline; filename=\"{fileName}\"";
+            return File(stream, "application/pdf");
+        }
+        catch (FileNotFoundException)
+        {
+            return NotFound($"File {fileName} not found");
         }
     }
 }
