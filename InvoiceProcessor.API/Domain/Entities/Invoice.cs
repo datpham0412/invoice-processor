@@ -14,6 +14,8 @@ namespace InvoiceProcessor.API.Domain.Entities
         public List<LineItem> LineItems { get; set; } = new();
         public string BlobUrl {get; set; } = string.Empty;
         public List<ExceptionRecord> ExceptionRecords { get; set; } = new();
+        public string UserId { get; set; } = default!;
+        public AppUser User { get; set; } = default!;
         public decimal CalculateTotal() => LineItems.Sum(x => x.Amount);
     }
 }
