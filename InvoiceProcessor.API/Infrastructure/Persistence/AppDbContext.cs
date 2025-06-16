@@ -12,10 +12,26 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
         public DbSet<LineItem>? LineItems { get; set; }
         public DbSet<PurchaseOrder>? PurchaseOrders { get; set; }
         public DbSet<ExceptionRecord>? ExceptionRecords { get; set; }
+        public DbSet<AppUser>? Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<AppUser>(entity =>
+            {
+                entity.HasKey(u => u.Id);
+                entity.Property(u => u.UserName).IsRequired().HasMaxLength(50);
+                entity.Property(u => u.Password).IsRequired();
+                entity.HasIndex(u => u.UserName).IsUnique();
+
+                // Seed sample users
+                entity.HasData(
+                    new AppUser { Id = "userA", UserName = "userA@example.com", Password = "passA" },
+                    new AppUser { Id = "datpham0412", UserName = "tiendat041202@gmail.com", Password = "Dat041202" }
+                );
+                
+            });
 
             modelBuilder.Entity<Invoice>(entity =>
             {
@@ -26,6 +42,13 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                 entity.Property(i => i.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(i => i.Status).IsRequired();
                 entity.Property(i => i.BlobUrl);
+                entity.Property(i => i.UserId).IsRequired();
+
+                entity.HasOne(i => i.User)
+                    .WithMany()
+                    .HasForeignKey(i => i.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
                 entity.HasMany(i => i.LineItems)
                       .WithOne()
                       .HasForeignKey(li => li.InvoiceId)
@@ -53,6 +76,12 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                 entity.Property(po => po.PoNumber).IsRequired().HasMaxLength(50);
                 entity.Property(po => po.VendorName).IsRequired().HasMaxLength(100);
                 entity.Property(po => po.IssueDate).IsRequired();
+                entity.Property(po => po.UserId).IsRequired();
+
+                entity.HasOne(po => po.User)
+                    .WithMany()
+                    .HasForeignKey(po => po.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasMany(po => po.LineItems)
                     .WithOne(li => li.PurchaseOrder)
@@ -71,7 +100,6 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                 entity.Property(li => li.UnitPrice).HasColumnType("decimal(18,2)");
                 entity.Property(li => li.Amount).HasColumnType("decimal(18,2)");
             });
-            
         }
     }
 }
