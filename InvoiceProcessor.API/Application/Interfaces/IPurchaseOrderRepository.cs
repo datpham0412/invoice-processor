@@ -2,13 +2,13 @@ using InvoiceProcessor.API.Domain.Entities;
 namespace InvoiceProcessor.API.Application.Interfaces;
 public interface IPurchaseOrderRepository
 {
-    Task<PurchaseOrder?> GetByPoNumberAsync(string poNumber);
-    Task<PurchaseOrder?> GetByPoNumberAsync(string invoiceNumber, string vendorName);
-    Task<PurchaseOrder?> GetByInvoiceNumberOnlyAsync(string invoiceNumber);
-    Task<List<PurchaseOrder>> GetAllAsync();
+    Task<PurchaseOrder?> GetByPoNumberAsync(string poNumber, string userId);
+    Task<PurchaseOrder?> GetByPoAndVendorAsync(string invoiceNumber, string vendorName, string userId);
+    Task<PurchaseOrder?> GetByInvoiceNumberOnlyAsync(string invoiceNumber, string userId);
+    Task<List<PurchaseOrder>> GetAllAsync(string userId);
     Task AddAsync(PurchaseOrder purchaseOrder);
     Task UpdateAsync(PurchaseOrder purchaseOrder);
-    Task DeleteAsync(Guid id);
+    Task DeleteAsync(Guid id, string userId);
     Task SaveChangesAsync();
 }
 
