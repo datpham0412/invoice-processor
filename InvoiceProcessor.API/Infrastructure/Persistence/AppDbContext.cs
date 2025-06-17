@@ -26,10 +26,10 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                 entity.HasIndex(u => u.UserName).IsUnique();
 
                 // Seed sample users
-                entity.HasData(
-                    new AppUser { Id = "userA", UserName = "userA@example.com", Password = "passA" },
-                    new AppUser { Id = "datpham0412", UserName = "tiendat041202@gmail.com", Password = "Dat041202" }
-                );
+                // entity.HasData(
+                //     new AppUser { Id = "userA", UserName = "userA@example.com", Password = "passA" },
+                //     new AppUser { Id = "datpham0412", UserName = "tiendat041202@gmail.com", Password = "Dat041202" }
+                // );
                 
             });
 
