@@ -1,5 +1,6 @@
 using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Domain.Entities;
+using InvoiceProcessor.API.Domain.Exceptions;
 using InvoiceProcessor.API.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,8 +52,18 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
 
         public async Task AddAsync(PurchaseOrder purchaseOrder)
         {
-            CalculateTotals(purchaseOrder);
-            await _context.PurchaseOrders!.AddAsync(purchaseOrder);
+            bool exists = await _context.PurchaseOrders!
+            .AnyAsync(po =>
+                po.UserId  == purchaseOrder.UserId &&
+                po.PoNumber == purchaseOrder.PoNumber &&
+                po.VendorName == purchaseOrder.VendorName);
+
+            if (exists)
+                throw new DuplicatePoException(
+                    purchaseOrder.PoNumber, purchaseOrder.UserId);
+
+                CalculateTotals(purchaseOrder);
+                await _context.PurchaseOrders!.AddAsync(purchaseOrder);
         }
 
         public async Task UpdateAsync(PurchaseOrder purchaseOrder)
@@ -67,6 +78,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
             if (po != null)
             {
                 _context.PurchaseOrders!.Remove(po);
+                await _context.SaveChangesAsync();
             }
         }
 
