@@ -48,15 +48,14 @@ public class InvoiceUploadController : ControllerBase
         try
         {
             var invoice = await _uploadService.ProcessUploadAsync(stream, file.FileName, userId);
+            var safeName = Uri.EscapeDataString(Path.GetFileName(invoice.BlobUrl)); // encode ONCE
+            var selfLink = $"invoices/file/{safeName}";
+
             var response = new UploadInvoiceResponse
             {
                 InvoiceId = invoice.Id,
                 Status = invoice.Status,
-                BlobUrl = Url.Action(
-                    nameof(Download),
-                    "InvoiceUpload",
-                    new { fileName = Path.GetFileName(invoice.BlobUrl) },
-                    Request.Scheme),
+                BlobUrl = selfLink,          // clean, single-encoded link
                 FailureReason = invoice.ExceptionRecords?.FirstOrDefault()?.Reason
             };
 
@@ -78,16 +77,17 @@ public class InvoiceUploadController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Download(string fileName)
     {
+        var decoded = Uri.UnescapeDataString(fileName);   // undo any double-encoding
+
         try
         {
-            var stream = await _blobStorage.DownloadAsync(fileName);
-
-            Response.Headers.ContentDisposition = $"inline; filename=\"{fileName}\"";
+            var stream = await _blobStorage.DownloadAsync(decoded);
+            Response.Headers.ContentDisposition = $"inline; filename=\"{decoded}\"";
             return File(stream, "application/pdf");
         }
         catch (FileNotFoundException)
         {
-            return NotFound($"File {fileName} not found");
+            return NotFound($"File {decoded} not found");
         }
     }
 }
