@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   plugins: [
@@ -25,12 +25,16 @@ export default defineConfig({
             type: 'image/png',
           },
         ],
-        server: {
-          proxy: {
-            '/api': 'https://localhost:7248'
-          }
-        }
       },
     }),
   ],
-})
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://localhost:7248',
+        changeOrigin: true,
+        secure: false 
+      }
+    }
+  }
+});
