@@ -52,18 +52,7 @@ function UploadInvoicePage() {
 
   return (
     <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>Upload Invoice</h1>
-        <button 
-          onClick={() => {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-          }}
-          className="btn btn-secondary"
-        >
-          Logout
-        </button>
-      </div>
+      <h1>Upload Invoice</h1>
       <form onSubmit={handleSubmit} className="form">
         <div className="form-group">
           <label>
