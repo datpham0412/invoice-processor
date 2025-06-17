@@ -2,9 +2,12 @@
 using InvoiceProcessor.API.Application.Models.PurchaseOrders;
 using InvoiceProcessor.API.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace InvoiceProcessor.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/purchaseorders")]
 public class PurchaseOrderController : ControllerBase
@@ -21,9 +24,10 @@ public class PurchaseOrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PurchaseOrderResponse>> Create([FromBody] CreatePurchaseOrderRequest request)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         try
         {
-            var response = await _createService.CreateAsync(request);
+            var response = await _createService.CreateAsync(request, userId);
             return CreatedAtAction(nameof(Create), new { id = response.Id }, response);
         }
         catch (InvalidOperationException ex)
@@ -36,7 +40,8 @@ public class PurchaseOrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PurchaseOrderResponse>> GetByPoNumber(string poNumber)
     {
-        var existing = await _createService.GetByPoNumberAsync(poNumber);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var existing = await _createService.GetByPoNumberAsync(poNumber, userId);
         if (existing == null)
         {
             return NotFound();
