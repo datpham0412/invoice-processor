@@ -13,24 +13,26 @@ namespace InvoiceProcessor.API.Infrastructure.Repositories{
             _context = context;
         }
 
-        public async Task<Invoice?> GetByIdAsync(Guid id)
+        public async Task<Invoice?> GetByIdAsync(Guid id, string userId)
         {
             return await _context.Invoices!
             .Include(i => i.LineItems)
-            .FirstOrDefaultAsync(i => i.Id == id);
+            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
         }
 
-        public async Task<List<Invoice>> GetAllAsync()
+        public async Task<List<Invoice>> GetAllAsync(string userId)
         {
             return await _context.Invoices!
                 .Include(i => i.LineItems)
+                .Where(i => i.UserId == userId)
                 .ToListAsync();
         }
         public async Task AddAsync(Invoice invoice)
         {
             bool exists = await _context.Invoices!
             .AnyAsync(i => i.VendorName == invoice.VendorName &&
-                        i.InvoiceNumber == invoice.InvoiceNumber);
+                        i.InvoiceNumber == invoice.InvoiceNumber &&
+                        i.UserId == invoice.UserId);
             if (exists)
             {
                 throw new DuplicateInvoiceException(invoice.VendorName, invoice.InvoiceNumber);
@@ -46,7 +48,7 @@ namespace InvoiceProcessor.API.Infrastructure.Repositories{
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, string userId)
         {
                 var invoice = await _context.Invoices!.FindAsync(id);
             if (invoice != null)
