@@ -42,20 +42,6 @@ namespace InvoiceProcessor.API.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "userA",
-                            Password = "passA",
-                            UserName = "userA@example.com"
-                        },
-                        new
-                        {
-                            Id = "datpham0412",
-                            Password = "Dat041202",
-                            UserName = "tiendat041202@gmail.com"
-                        });
                 });
 
             modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.ExceptionRecord", b =>
