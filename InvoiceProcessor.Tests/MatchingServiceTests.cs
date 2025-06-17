@@ -13,6 +13,7 @@ namespace InvoiceProcessor.Tests
 {
     public class MatchingServiceTests
     {
+        private const string TestUserId = "userA";
         private readonly Mock<IPurchaseOrderRepository>   _poRepo   = new();
         private readonly Mock<IInvoiceRepository>         _invRepo  = new();
         private readonly Mock<IExceptionRecordRepository> _excRepo  = new();
@@ -39,7 +40,7 @@ namespace InvoiceProcessor.Tests
                 PoNumber   = "PO-123",
                 VendorName = "Acme",
                 TotalAmount= 100,
-                UserId     = "userA"
+                UserId     = TestUserId
             };
 
             var poLine = new POLineItem { Quantity = 2, UnitPrice = 50, Amount = 100 };
@@ -50,10 +51,10 @@ namespace InvoiceProcessor.Tests
                 VendorName = "Acme",
                 LineItems  = new List<POLineItem> { poLine },
                 TotalAmount= 100,
-                UserId     = "userA"
+                UserId     = TestUserId
             };
 
-            _poRepo.Setup(r => r.GetByPoNumberAsync(invoice.PoNumber))
+            _poRepo.Setup(r => r.GetByPoNumberAsync(invoice.PoNumber, TestUserId))
                    .ReturnsAsync(po);
 
             // Act
@@ -81,7 +82,7 @@ namespace InvoiceProcessor.Tests
                 PoNumber   = "PO-123",
                 VendorName = "Acme",
                 TotalAmount= 200,
-                UserId     = "userA"
+                UserId     = TestUserId
             };
 
             var poLine = new POLineItem { Quantity = 2, UnitPrice = 50, Amount = 100 };
@@ -92,10 +93,10 @@ namespace InvoiceProcessor.Tests
                 VendorName  = "Acme",
                 LineItems   = new List<POLineItem> { poLine },
                 TotalAmount = 100,
-                UserId      = "userA"
+                UserId      = TestUserId
             };
 
-            _poRepo.Setup(r => r.GetByPoNumberAsync(invoice.PoNumber))
+            _poRepo.Setup(r => r.GetByPoNumberAsync(invoice.PoNumber, TestUserId))
                    .ReturnsAsync(po);
 
             var result = await _service.MatchInvoiceAsync(invoice);
@@ -121,11 +122,13 @@ namespace InvoiceProcessor.Tests
                 InvoiceNumber = "INV-900",
                 VendorName    = "Acme",
                 TotalAmount   = 80,
-                UserId        = "userA"
+                UserId        = TestUserId
             };
 
-            _poRepo.Setup(r => r.GetByPoNumberAsync(
-                               invoice.InvoiceNumber!, invoice.VendorName))
+            _poRepo.Setup(r => r.GetByPoAndVendorAsync(
+                               invoice.InvoiceNumber!, 
+                               invoice.VendorName.Trim().ToLowerInvariant(), 
+                               TestUserId))
                    .ReturnsAsync((PurchaseOrder?)null);
 
             var result = await _service.MatchInvoiceAsync(invoice);
@@ -151,22 +154,30 @@ namespace InvoiceProcessor.Tests
                 InvoiceNumber = "INV-900",
                 VendorName    = "Acme",
                 TotalAmount   = 60,
-                UserId        = "userA"
+                UserId        = TestUserId
             };
 
-            var poLine = new POLineItem { Quantity = 3, UnitPrice = 20, Amount = 60 };
+            var poLine = new POLineItem { Quantity = 3, UnitPrice = 20 };
             var fallbackPo = new PurchaseOrder
             {
                 Id          = Guid.NewGuid(),
                 PoNumber    = "INV-900",   // vendor uses Invoice# as PO#
                 VendorName  = "Acme",
                 LineItems   = new List<POLineItem> { poLine },
-                TotalAmount = 60,
-                UserId      = "userA"
+                UserId      = TestUserId
             };
 
-            _poRepo.Setup(r => r.GetByPoNumberAsync(
-                    invoice.InvoiceNumber!, invoice.VendorName))
+            // Calculate totals like the repository would
+            foreach (var item in fallbackPo.LineItems)
+            {
+                item.Amount = item.Quantity * item.UnitPrice;
+            }
+            fallbackPo.TotalAmount = fallbackPo.LineItems.Sum(li => li.Amount);
+
+            _poRepo.Setup(r => r.GetByPoAndVendorAsync(
+                    invoice.InvoiceNumber!, 
+                    invoice.VendorName.Trim().ToLowerInvariant(), 
+                    TestUserId))
                    .ReturnsAsync(fallbackPo);
 
             var result = await _service.MatchInvoiceAsync(invoice);

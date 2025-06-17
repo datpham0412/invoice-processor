@@ -8,6 +8,8 @@ using Xunit;
 
 public class PurchaseOrderRepositoryTests
 {
+    private const string TestUserId = "userA";
+    
     private static AppDbContext BuildContext(string dbName)
     {
         var opt = new DbContextOptionsBuilder<AppDbContext>()
@@ -30,7 +32,7 @@ public class PurchaseOrderRepositoryTests
             PoNumber = "PO-001",
             VendorName = "Acme Corp",
             IssueDate = DateTime.UtcNow,
-            UserId = "userA",
+            UserId = TestUserId,
             LineItems =
             {
                 new POLineItem { Id = Guid.NewGuid(), Quantity = 2, UnitPrice = 50 },
@@ -61,13 +63,13 @@ public class PurchaseOrderRepositoryTests
             VendorName = "Acme",
             IssueDate = DateTime.UtcNow,
             TotalAmount = 10,
-            UserId = "userA"
+            UserId = TestUserId
         });
         await ctx.SaveChangesAsync();
 
         var repo = new PurchaseOrderRepository(ctx);
 
-        var po = await repo.GetByPoNumberAsync("PO-123");
+        var po = await repo.GetByPoNumberAsync("PO-123", TestUserId);
 
         Assert.NotNull(po);
         Assert.Equal("Acme", po!.VendorName);
@@ -86,7 +88,7 @@ public class PurchaseOrderRepositoryTests
                 VendorName = "Old",
                 IssueDate = DateTime.UtcNow,
                 TotalAmount = 1,
-                UserId = "userA"
+                UserId = TestUserId
             });
             await ctx.SaveChangesAsync();
         }
@@ -94,7 +96,7 @@ public class PurchaseOrderRepositoryTests
         await using (var ctx = BuildContext(dbName))
         {
             var repo = new PurchaseOrderRepository(ctx);
-            var po = await repo.GetByPoNumberAsync("PO-X");
+            var po = await repo.GetByPoNumberAsync("PO-X", TestUserId);
             Assert.NotNull(po);
             po!.VendorName = "New";
             await repo.UpdateAsync(po);
@@ -120,7 +122,7 @@ public class PurchaseOrderRepositoryTests
                 VendorName = "RemoveMe",
                 IssueDate = DateTime.UtcNow,
                 TotalAmount = 5,
-                UserId = "userA"
+                UserId = TestUserId
             });
             await ctx.SaveChangesAsync();
         }
@@ -128,7 +130,7 @@ public class PurchaseOrderRepositoryTests
         await using (var ctx = BuildContext(dbName))
         {
             var repo = new PurchaseOrderRepository(ctx);
-            await repo.DeleteAsync(id);
+            await repo.DeleteAsync(id, TestUserId);
             await repo.SaveChangesAsync();
         }
 

@@ -11,6 +11,7 @@ using Xunit;
 
 public class CreatePurchaseOrderServiceTests
 {
+    private const string TestUserId = "userA";
     private readonly Mock<IPurchaseOrderRepository> _poRepoMock = new();
     private readonly CreatePurchaseOrderService     _service;
 
@@ -38,10 +39,10 @@ public class CreatePurchaseOrderServiceTests
             }
         };
 
-        _poRepoMock.Setup(r => r.GetByPoNumberAsync("PO-001"))
+        _poRepoMock.Setup(r => r.GetByPoNumberAsync("PO-001", TestUserId))
                    .ReturnsAsync((PurchaseOrder?)null);
 
-        // mimic repo’s total calculation side-effect
+        // mimic repo's total calculation side-effect
         _poRepoMock.Setup(r => r.AddAsync(It.IsAny<PurchaseOrder>()))
                    .Callback<PurchaseOrder>(po =>
                    {
@@ -52,7 +53,7 @@ public class CreatePurchaseOrderServiceTests
                    });
 
         // Act
-        var response = await _service.CreateAsync(request);
+        var response = await _service.CreateAsync(request, TestUserId);
 
         // Assert
         Assert.Equal("PO-001", response.PoNumber);
@@ -68,7 +69,7 @@ public class CreatePurchaseOrderServiceTests
     [Fact]
     public async Task CreateAsync_ShouldThrow_WhenPoNumberAlreadyExists()
     {
-        _poRepoMock.Setup(r => r.GetByPoNumberAsync("PO-001"))
+        _poRepoMock.Setup(r => r.GetByPoNumberAsync("PO-001", TestUserId))
                    .ReturnsAsync(new PurchaseOrder { PoNumber = "PO-001" });
 
         var request = new CreatePurchaseOrderRequest
@@ -78,7 +79,7 @@ public class CreatePurchaseOrderServiceTests
             IssueDate  = DateTime.UtcNow
         };
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CreateAsync(request));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CreateAsync(request, TestUserId));
 
         _poRepoMock.Verify(r => r.AddAsync(It.IsAny<PurchaseOrder>()), Times.Never);
         _poRepoMock.Verify(r => r.SaveChangesAsync(),                 Times.Never);
@@ -104,11 +105,11 @@ public class CreatePurchaseOrderServiceTests
             TotalAmount = 6.0m
         };
 
-        _poRepoMock.Setup(r => r.GetByPoNumberAsync("PO-123"))
+        _poRepoMock.Setup(r => r.GetByPoNumberAsync("PO-123", TestUserId))
                    .ReturnsAsync(po);
 
         // Act
-        var response = await _service.GetByPoNumberAsync("PO-123");
+        var response = await _service.GetByPoNumberAsync("PO-123", TestUserId);
 
         // Assert
         Assert.NotNull(response);
@@ -124,10 +125,10 @@ public class CreatePurchaseOrderServiceTests
     [Fact]
     public async Task GetByPoNumberAsync_ShouldReturnNull_WhenPoDoesNotExist()
     {
-        _poRepoMock.Setup(r => r.GetByPoNumberAsync("MISSING"))
+        _poRepoMock.Setup(r => r.GetByPoNumberAsync("MISSING", TestUserId))
                    .ReturnsAsync((PurchaseOrder?)null);
 
-        var result = await _service.GetByPoNumberAsync("MISSING");
+        var result = await _service.GetByPoNumberAsync("MISSING", TestUserId);
 
         Assert.Null(result);
     }
