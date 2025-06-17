@@ -1,11 +1,15 @@
 using InvoiceProcessor.API.Infrastructure.Persistence;
 using InvoiceProcessor.API.Domain.Entities;
 using InvoiceProcessor.API.Infrastructure.Settings;
+using InvoiceProcessor.API.Application.Interfaces;
+using InvoiceProcessor.API.Application.Models.Auth;
+using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceProcessor.API.Controllers;
 
@@ -26,9 +30,9 @@ public class AuthController : ControllerBase
     public IActionResult Login(LoginRequest req)
     {
         var user = _ctx.Users!
-            .SingleOrDefault(u => u.UserName == req.UserName && u.Password == req.Password);
+            .SingleOrDefault(u => u.UserName == req.UserName);
 
-        if (user is null)
+         if (user is null || !BCrypt.Net.BCrypt.Verify(req.Password, user.Password))
             return Unauthorized(new { message = "Invalid username or password" });
 
         var claims = new[]
@@ -50,6 +54,26 @@ public class AuthController : ControllerBase
 
         return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
     }
+    [HttpPost("register")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest req)
+    {
+        if (await _ctx.Users!.AnyAsync(u => u.UserName == req.UserName))
+            return Conflict("User already exists");
+
+        var hash = BCrypt.Net.BCrypt.HashPassword(req.Password);
+
+        var user = new AppUser
+        {
+            Id       = Guid.NewGuid().ToString(),
+            UserName = req.UserName,
+            Password = hash
+        };
+
+        _ctx.Users!.Add(user);
+        await _ctx.SaveChangesAsync();
+
+        return StatusCode(201);
+    }
 }
 
-public record LoginRequest(string UserName, string Password);
