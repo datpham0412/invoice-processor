@@ -120,9 +120,7 @@ namespace InvoiceProcessor.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("VendorName", "InvoiceNumber")
+                    b.HasIndex("UserId", "VendorName", "InvoiceNumber")
                         .IsUnique();
 
                     b.ToTable("Invoices");
@@ -214,10 +212,8 @@ namespace InvoiceProcessor.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PoNumber")
+                    b.HasIndex("UserId", "PoNumber")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("PurchaseOrders");
                 });
