@@ -58,7 +58,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                     .WithOne(er => er.Invoice)
                     .HasForeignKey(er => er.InvoiceId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasIndex(i => new { i.VendorName, i.InvoiceNumber }).IsUnique();
+                entity.HasIndex(i => new { i.UserId, i.VendorName, i.InvoiceNumber }).IsUnique();
             });
 
             modelBuilder.Entity<LineItem>(entity =>
@@ -88,7 +88,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                     .HasForeignKey(li => li.PurchaseOrderId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasIndex(po => po.PoNumber).IsUnique();
+                entity.HasIndex(po => new { po.UserId, po.PoNumber }).IsUnique();
                 entity.Property(po => po.TotalAmount).HasColumnType("decimal(18,2)");
             });
 
