@@ -12,31 +12,34 @@ namespace InvoiceProcessor.API.Application.Services
         {
             _purchaseOrderRepository = purchaseOrderRepository;
         }
-        public async Task<PurchaseOrderResponse?> GetByPoNumberAsync(string poNumber)
+
+        private static PurchaseOrderResponse MapToResponse(PurchaseOrder po) => new()
         {
-            var po = await _purchaseOrderRepository.GetByPoNumberAsync(poNumber);
+            Id = po.Id,
+            PoNumber = po.PoNumber,
+            VendorName = po.VendorName,
+            IssueDate = po.IssueDate,
+            TotalAmount = po.TotalAmount,
+            LineItems = po.LineItems.Select(li => new PurchaseOrderLineItemResponse
+            {
+                Description = li.Description,
+                Quantity = li.Quantity,
+                UnitPrice = li.UnitPrice,
+                Amount = li.Amount
+            }).ToList()
+        };
+
+        public async Task<PurchaseOrderResponse?> GetByPoNumberAsync(string poNumber, string userId)
+        {
+            var po = await _purchaseOrderRepository.GetByPoNumberAsync(poNumber, userId);
             if (po == null) return null;
 
-            return new PurchaseOrderResponse
-            {
-                Id = po.Id,
-                PoNumber = po.PoNumber,
-                VendorName = po.VendorName,
-                IssueDate = po.IssueDate,
-                TotalAmount = po.TotalAmount,
-                LineItems = po.LineItems.Select(li => new PurchaseOrderLineItemResponse
-                {
-                    Description = li.Description,
-                    Quantity = li.Quantity,
-                    UnitPrice = li.UnitPrice,
-                    Amount = li.Amount
-                }).ToList()
-            };
+            return MapToResponse(po);
         }
 
-        public async Task<PurchaseOrderResponse> CreateAsync(CreatePurchaseOrderRequest request)
+        public async Task<PurchaseOrderResponse> CreateAsync(CreatePurchaseOrderRequest request, string userId)
         {
-            var existing = await _purchaseOrderRepository.GetByPoNumberAsync(request.PoNumber);
+            var existing = await _purchaseOrderRepository.GetByPoNumberAsync(request.PoNumber, userId);
             if (existing != null)
             {
                 throw new InvalidOperationException($"PO number '{request.PoNumber}' already exists.");
@@ -54,27 +57,14 @@ namespace InvoiceProcessor.API.Application.Services
                     Description = li.Description,
                     Quantity = li.Quantity,
                     UnitPrice = li.UnitPrice
-                }).ToList()
+                }).ToList(),
+                UserId = userId
             };
 
             await _purchaseOrderRepository.AddAsync(purchaseOrder);
             await _purchaseOrderRepository.SaveChangesAsync();
 
-            return new PurchaseOrderResponse
-            {
-                Id = purchaseOrder.Id,
-                PoNumber = purchaseOrder.PoNumber,
-                VendorName = purchaseOrder.VendorName,
-                IssueDate = purchaseOrder.IssueDate,
-                TotalAmount = purchaseOrder.TotalAmount,
-                LineItems = purchaseOrder.LineItems.Select(li => new PurchaseOrderLineItemResponse
-                {
-                    Description = li.Description,
-                    Quantity = li.Quantity,
-                    UnitPrice = li.UnitPrice,
-                    Amount = li.Amount
-                }).ToList()
-            };
+            return MapToResponse(purchaseOrder);
         }
     }
 }
