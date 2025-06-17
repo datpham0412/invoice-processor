@@ -23,29 +23,30 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
         {
             _context = context;
         }
+        public async Task<PurchaseOrder?> GetByPoNumberAsync(string poNumber, string userId)
+        {
+            return await _context.PurchaseOrders!
+                .Include(p => p.LineItems)
+                .FirstOrDefaultAsync(p =>
+                    p.PoNumber == poNumber &&
+                    p.UserId   == userId);         
+        }
 
-        public async Task<PurchaseOrder?> GetByPoNumberAsync(string poNumber)
+        public async Task<PurchaseOrder?> GetByPoAndVendorAsync(string invoiceNumber, string vendorName, string userId)
         {
             return await _context.PurchaseOrders!
                 .Include(po => po.LineItems)
-                .FirstOrDefaultAsync(po => po.PoNumber == poNumber);
+                .FirstOrDefaultAsync(po => po.PoNumber == invoiceNumber && po.VendorName == vendorName && po.UserId == userId);
         }
-
-        public async Task<PurchaseOrder?> GetByPoNumberAsync(string invoiceNumber, string vendorName)
+        public async Task<PurchaseOrder?> GetByInvoiceNumberOnlyAsync(string invoiceNumber, string userId)
         {
             return await _context.PurchaseOrders!
-                .Include(po => po.LineItems)
-                .FirstOrDefaultAsync(po => po.PoNumber == invoiceNumber && po.VendorName == vendorName);
-        }
-        public async Task<PurchaseOrder?> GetByInvoiceNumberOnlyAsync(string invoiceNumber)
-        {
-            return await _context.PurchaseOrders!
-                .FirstOrDefaultAsync(po => po.PoNumber == invoiceNumber);
+                .FirstOrDefaultAsync(po => po.PoNumber == invoiceNumber && po.UserId == userId);
         }
 
-        public async Task<List<PurchaseOrder>> GetAllAsync()
+        public async Task<List<PurchaseOrder>> GetAllAsync(string userId)
         {
-            return await _context.PurchaseOrders!.ToListAsync();
+            return await _context.PurchaseOrders!.Where(po => po.UserId == userId).ToListAsync();
         }
 
         public async Task AddAsync(PurchaseOrder purchaseOrder)
@@ -60,12 +61,12 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, string userId)
         {
-            var po = await _context.PurchaseOrders!.FindAsync(id);
+            var po = await _context.PurchaseOrders!.FirstOrDefaultAsync(po => po.Id == id && po.UserId == userId);
             if (po != null)
             {
-                _context.PurchaseOrders.Remove(po);
+                _context.PurchaseOrders!.Remove(po);
             }
         }
 
