@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api/api';
 
 function UploadInvoicePage() {
   const [file, setFile] = useState(null);
@@ -33,22 +34,16 @@ function UploadInvoicePage() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('https://localhost:7248/api/invoices/upload', {
-        method: 'POST',
-        body: formData
+      const { data } = await api.post('/invoices/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to upload invoice');
-      }
-
-      const data = await res.json();
       setResponse(data);
       // Navigate to result page after successful upload
       navigate('/result', { state: { invoiceData: data } });
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || 'Failed to upload invoice');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -57,7 +52,18 @@ function UploadInvoicePage() {
 
   return (
     <div className="container">
-      <h1>Upload Invoice</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1>Upload Invoice</h1>
+        <button 
+          onClick={() => {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }}
+          className="btn btn-secondary"
+        >
+          Logout
+        </button>
+      </div>
       <form onSubmit={handleSubmit} className="form">
         <div className="form-group">
           <label>
