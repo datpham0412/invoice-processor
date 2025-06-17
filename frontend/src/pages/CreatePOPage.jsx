@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PurchaseOrderForm from '../components/PurchaseOrderForm';
+import api from '../api/api';
 
 function CreatePOPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,23 +14,12 @@ function CreatePOPage() {
     setError(null);
 
     try {
-      const res = await fetch('https://localhost:7248/api/purchaseorders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to submit PO');
-      }
-
-      const data = await res.json();
+      const { data } = await api.post('/purchaseorders', payload);
       setResponse(data);
       // Navigate to upload invoice page after successful PO creation
       navigate('/upload-invoice');
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || 'Failed to submit PO');
       console.error(err);
     } finally {
       setIsLoading(false);
