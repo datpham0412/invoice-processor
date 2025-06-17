@@ -30,9 +30,10 @@ namespace InvoiceProcessor.API.Infrastructure.Repositories{
         public async Task AddAsync(Invoice invoice)
         {
             bool exists = await _context.Invoices!
-            .AnyAsync(i => i.VendorName == invoice.VendorName &&
-                        i.InvoiceNumber == invoice.InvoiceNumber &&
-                        i.UserId == invoice.UserId);
+            .AnyAsync(i => 
+                i.InvoiceNumber == invoice.InvoiceNumber &&
+                i.UserId == invoice.UserId &&
+                i.VendorName == invoice.VendorName);
             if (exists)
             {
                 throw new DuplicateInvoiceException(invoice.VendorName, invoice.InvoiceNumber);
@@ -50,10 +51,11 @@ namespace InvoiceProcessor.API.Infrastructure.Repositories{
 
         public async Task DeleteAsync(Guid id, string userId)
         {
-                var invoice = await _context.Invoices!.FindAsync(id);
+            var invoice = await _context.Invoices!.FindAsync(id);
             if (invoice != null)
             {
                 _context.Invoices!.Remove(invoice);
+                await _context.SaveChangesAsync();
             }
         }
 
