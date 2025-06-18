@@ -1,9 +1,11 @@
 using InvoiceProcessor.API.Domain.Entities;
+using InvoiceProcessor.API.Application.Models.ListItem;
 namespace InvoiceProcessor.API.Application.Interfaces;
 public interface IInvoiceRepository
 {
     Task<Invoice?> GetByIdAsync(Guid id, string userId);
     Task<List<Invoice>> GetAllAsync(string userId);
+    Task<List<InvoiceListItemDto>> GetAllByUserAsync(string userId);
     Task AddAsync(Invoice invoice);
     Task UpdateAsync(Invoice invoice);
     Task DeleteAsync(Guid id, string userId);
