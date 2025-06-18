@@ -5,6 +5,9 @@ import UploadInvoicePage from './pages/UploadInvoicePage';
 import ResultPage from './pages/ResultPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
+import InvoicesPage from './pages/InvoicesPage';
+import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
+import NavBar from './components/NavBar';
 import './App.css';
 
 // Wrapper for protecting routes
@@ -25,16 +28,12 @@ function App() {
 
   return (
     <>
-      {token && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px' }}>
-          <div>Welcome, {username}</div>
-          <button onClick={logout}>Logout</button>
-        </div>
-      )}
+      {token && <NavBar />}
       <Routes>
         {/* Public login route */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        
         {/* Protected routes */}
         <Route
           path="/"
@@ -57,6 +56,22 @@ function App() {
           element={
             <RequireAuth>
               <ResultPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/invoices"
+          element={
+            <RequireAuth>
+              <InvoicesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/purchase-orders"
+          element={
+            <RequireAuth>
+              <PurchaseOrdersPage />
             </RequireAuth>
           }
         />
