@@ -48,14 +48,20 @@ public class InvoiceUploadController : ControllerBase
         try
         {
             var invoice = await _uploadService.ProcessUploadAsync(stream, file.FileName, userId);
-            var safeName = Uri.EscapeDataString(Path.GetFileName(invoice.BlobUrl)); // encode ONCE
-            var selfLink = $"invoices/file/{safeName}";
+            var safeName = Uri.EscapeDataString(Path.GetFileName(invoice.BlobUrl));
+            
+            // Save only the relative file route in DB
+            invoice.BlobUrl = $"/api/invoices/file/{safeName}";
+            await _ctx.SaveChangesAsync();   // make sure change persists
+
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var selfLink = $"{baseUrl}{invoice.BlobUrl}";  // full URL for response
 
             var response = new UploadInvoiceResponse
             {
                 InvoiceId = invoice.Id,
                 Status = invoice.Status,
-                BlobUrl = selfLink,          // clean, single-encoded link
+                BlobUrl = selfLink,          // absolute for ResultPage
                 FailureReason = invoice.ExceptionRecords?.FirstOrDefault()?.Reason
             };
 
@@ -63,11 +69,11 @@ public class InvoiceUploadController : ControllerBase
         }
         catch (DuplicateInvoiceException ex)
         {
-            return Conflict(new { message = ex.Message }); // 409 Conflict
+            return Conflict(new { message = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { message = ex.Message }); // OCR failure etc.
+            return BadRequest(new { message = ex.Message });
         }
     }
 
@@ -77,7 +83,7 @@ public class InvoiceUploadController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Download(string fileName)
     {
-        var decoded = Uri.UnescapeDataString(fileName);   // undo any double-encoding
+        var decoded = Uri.UnescapeDataString(fileName);
 
         try
         {
