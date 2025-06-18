@@ -3,6 +3,7 @@ using InvoiceProcessor.API.Domain.Entities;
 using InvoiceProcessor.API.Infrastructure.Persistence;
 using InvoiceProcessor.API.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using InvoiceProcessor.API.Application.Models.ListItem;
 
 namespace InvoiceProcessor.API.Infrastructure.Repositories{
     public class InvoiceRepository : IInvoiceRepository{
@@ -25,6 +26,15 @@ namespace InvoiceProcessor.API.Infrastructure.Repositories{
             return await _context.Invoices!
                 .Include(i => i.LineItems)
                 .Where(i => i.UserId == userId)
+                .ToListAsync();
+        }
+        public async Task<List<InvoiceListItemDto>> GetAllByUserAsync(string userId)
+        {
+            return await _context.Invoices!
+                .Include(i => i.LineItems)
+                .Where(i => i.UserId == userId)
+                .OrderByDescending(i => i.InvoiceDate)
+                .Select(i => new InvoiceListItemDto(i.Id, i.InvoiceNumber, i.VendorName, i.TotalAmount, i.InvoiceDate, i.Status, i.LineItems.Select(li => new LineItemListDto(li.Id, li.Description, li.Quantity, li.UnitPrice, li.Amount)).ToList(), i.BlobUrl))
                 .ToListAsync();
         }
         public async Task AddAsync(Invoice invoice)
