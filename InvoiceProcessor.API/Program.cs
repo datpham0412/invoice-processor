@@ -34,7 +34,7 @@ builder.Services.AddSwaggerGen(c =>
     Scheme = "Bearer",
     BearerFormat = "JWT",
     In = ParameterLocation.Header,
-    Description = "Paste only the token below; “Bearer ” will be added automatically."
+    Description = "Paste only the token below; “Bearer ” will be added automatically.",
 });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -63,6 +63,8 @@ builder.Services.Configure<FormRecognizerSettings>(
     builder.Configuration.GetSection("FormRecognizer")
 );
 builder.Services.AddScoped<IFormRecognizer, FormRecognizerClient>();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
