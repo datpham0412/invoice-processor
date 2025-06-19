@@ -28,12 +28,16 @@ public class InvoicesController : ControllerBase
             }
             else
             {
+                // If it's http but not localhost, force https
+                if (blobUrl.StartsWith("http://") && !blobUrl.Contains("localhost"))
+                    return "https://" + blobUrl.Substring("http://".Length);
                 return blobUrl; // already a full URL to your backend
             }
         }
 
-        // Convert relative path to full URL
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        // Always use https in production
+        var scheme = Request.Host.Host.Contains("localhost") ? "http" : "https";
+        var baseUrl = $"{scheme}://{Request.Host}";
         return $"{baseUrl}{(blobUrl.StartsWith('/') ? "" : "/")}{blobUrl}";
     }
 
