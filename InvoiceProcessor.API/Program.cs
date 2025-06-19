@@ -117,14 +117,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddScoped<IUserService, UserService>();
 
-builder.Services.Configure<ForwardedHeadersOptions>(o =>
-{
-    o.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-    o.KnownNetworks.Clear();   // Accept from any proxy (e.g., Fly.io, Docker)
-    o.KnownProxies.Clear();
-});
-
 var app = builder.Build();
+
+// MUST be before UseRouting / MapControllers
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto |
+                       ForwardedHeaders.XForwardedHost,
+    // Trust Fly's dynamic edge IPs
+    KnownNetworks = { },       // clear
+    KnownProxies  = { }
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -132,8 +135,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseForwardedHeaders();
 
 // Disable HTTPS redirection in containers
 if (!app.Environment.IsDevelopment())
@@ -150,11 +151,12 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseRouting();
 app.UseAuthentication();   
 app.UseAuthorization();
+app.UseCors();
 
 app.MapControllers();
-app.UseCors();
 
 app.MapGet("/", () => "Invoice API is running 🚀");
 

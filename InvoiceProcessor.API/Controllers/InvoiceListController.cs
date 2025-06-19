@@ -4,6 +4,7 @@ using InvoiceProcessor.API.Application.Models.ListItem;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.Extensions.Hosting;
 
 [ApiController]
 [Route("api/invoices")]
@@ -11,34 +12,55 @@ using System.Security.Claims;
 public class InvoicesController : ControllerBase
 {
     private readonly IInvoiceRepository _repo;
-    public InvoicesController(IInvoiceRepository repo) => _repo = repo;
+    private readonly IWebHostEnvironment _env;
+
+    public InvoicesController(IInvoiceRepository repo,
+                              IWebHostEnvironment env)
+    {
+        _repo = repo;
+        _env  = env;
+    }
 
     private string CurrentUser => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
     private string ToFullUrl(string blobUrl)
     {
+        // ─── 1. Absolute URLs ──────────────────────────────────
         if (blobUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
         {
-            // If it's a raw Azure Blob URL, convert it
+            // ► a) Proxy Azure blobs
             if (blobUrl.Contains(".blob.core.windows.net"))
             {
                 var filename = Path.GetFileName(blobUrl);
-                var encoded = Uri.EscapeDataString(filename);
-                blobUrl = $"/api/invoices/file/{encoded}";
+                var encoded  = Uri.EscapeDataString(filename);
+                return $"/api/invoices/file/{encoded}";
             }
-            else
+
+            // ► b) In PRODUCTION, upgrade plain-HTTP links
+            if (!_env.IsDevelopment())
             {
-                if (blobUrl.StartsWith("http://") && !blobUrl.Contains("localhost"))
+                var uri = new Uri(blobUrl, UriKind.Absolute);
+                bool isLocal = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+                            || System.Net.IPAddress.TryParse(uri.Host, out _);
+
+                if (uri.Scheme == Uri.UriSchemeHttp && !isLocal)
                     return "https://" + blobUrl.Substring("http://".Length);
-                return blobUrl; 
             }
+
+            return blobUrl;        // leave untouched in dev
         }
 
-        // For localhost, use http
-        // var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        // ─── 2. Relative URLs ──────────────────────────────────
+        var scheme = Request.Headers["X-Forwarded-Proto"].FirstOrDefault()
+                  ?? Request.Scheme;
 
-        // Convert relative path to full URL
-        var scheme = Request.Host.Host.Contains("localhost") ? "http" : "https";
+        if (scheme == "http"
+            && !Request.Host.Host.Contains("localhost", StringComparison.OrdinalIgnoreCase)
+            && !System.Net.IPAddress.TryParse(Request.Host.Host, out _))
+        {
+            scheme = "https"; // 🔒 fallback upgrade
+        }
+
         var baseUrl = $"{scheme}://{Request.Host}";
         return $"{baseUrl}{(blobUrl.StartsWith('/') ? "" : "/")}{blobUrl}";
     }
