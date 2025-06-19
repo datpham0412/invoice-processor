@@ -47,6 +47,7 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy backend to Fly.io
+        working-directory: InvoiceProcessor.API
         run: flyctl deploy -c InvoiceProcessor.API/fly.toml --remote-only -a invoice-backend-snowy-shape-2157
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
