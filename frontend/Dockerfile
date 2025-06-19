@@ -18,11 +18,6 @@ RUN npm run build             # → creates /app/dist
 # ────────────────────────────────
 FROM nginx:stable-alpine
 
-# If you need client-side routing, drop in a custom config.
-# Otherwise Nginx’s default works fine for static files.
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy the built site to the Nginx web root
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
