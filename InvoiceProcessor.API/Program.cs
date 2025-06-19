@@ -29,13 +29,14 @@ builder.Services.AddSwaggerGen(c =>
     });
 
     // ✅ Add JWT support to Swagger
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
-    Type = SecuritySchemeType.Http,   // 👈 switch from ApiKey → Http
-    Scheme = "Bearer",
-    BearerFormat = "JWT",
-    In = ParameterLocation.Header,
-    Description = "Paste only the token below; “Bearer ” will be added automatically.",
-});
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
+    {
+        Type = SecuritySchemeType.Http,   // 👈 switch from ApiKey → Http
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste only the token below; \"Bearer \" will be added automatically."
+    });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -124,11 +125,27 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Disable HTTPS redirection in containers
+if (!app.Environment.IsDevelopment())
+{
+    // Only use HTTPS redirection if it makes sense
+    var disableHttps = Environment.GetEnvironmentVariable("DISABLE_HTTPS_REDIRECT");
+    if (string.IsNullOrEmpty(disableHttps))
+    {
+        app.UseHttpsRedirection();
+    }
+}
+else
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseAuthentication();   
 app.UseAuthorization();
 
 app.MapControllers();
 app.UseCors();
+
+app.MapGet("/", () => "Invoice API is running 🚀");
 
 app.Run();
