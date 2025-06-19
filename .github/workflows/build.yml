@@ -1,14 +1,77 @@
-name: Build and Test
+name: CI / Deploy
 
-on: [push, pull_request]
+on:
+  # build & test on every PR or push
+  pull_request:
+  push:
+    branches:
+      - main        # ⬅ only main triggers the deploy jobs
 
 jobs:
-  build:
+  # ------------------------------------------------------------
+  # 1) Build + test the .NET solution
+  # ------------------------------------------------------------
+  build-test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "8.0.x"
-      - run: dotnet build InvoiceProcessor.sln
+          dotnet-version: "6.0.x"
+
+      - name: Restore
+        run: dotnet restore InvoiceProcessor.sln
+
+      - name: Build
+        run: dotnet build InvoiceProcessor.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test InvoiceProcessor.sln --no-build --verbosity normal
+
+  # ------------------------------------------------------------
+  # 2) Deploy BACKEND (only on pushes to main)
+  # ------------------------------------------------------------
+  deploy-backend:
+    needs: build-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production   
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Fly CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy backend to Fly.io
+        run: flyctl deploy -c InvoiceProcessor.API/fly.toml --remote-only -a invoice-backend-snowy-shape-2157
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  # ------------------------------------------------------------
+  # 3) Deploy FRONTEND (only on pushes to main)
+  # ------------------------------------------------------------
+  deploy-frontend:
+    needs: build-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+
+    # All commands run inside the frontend/ sub-dir
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Fly CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy frontend to Fly.io
+        run: flyctl deploy --remote-only -a invoice-frontend
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
