@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  backend:
+    # build the image from InvoiceProcessor.API/Dockerfile
+    build:
+      context: ./InvoiceProcessor.API       # path to csproj & Dockerfile
+      dockerfile: Dockerfile
+    env_file:
+      - ./InvoiceProcessor.API/.env         # the file you showed above
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production   # always override
+    ports:
+      - "8080:80"                           # host:container
