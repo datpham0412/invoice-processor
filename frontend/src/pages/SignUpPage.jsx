@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/api'; 
 
 export default function SignupPage() {
@@ -25,7 +25,10 @@ export default function SignupPage() {
       <input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Username" required />
       <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
       <button type="submit">Create account</button>
-      <p>Already have an account? <Link to="/login">Login</Link></p>
+      <p>Already have an account?</p>
+      <button type="button" onClick={() => nav('/login')}>
+        Go to Login
+      </button>
     </form>
   );
 }
