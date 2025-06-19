@@ -133,6 +133,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseForwardedHeaders();
+
 // Disable HTTPS redirection in containers
 if (!app.Environment.IsDevelopment())
 {
@@ -148,7 +150,6 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseForwardedHeaders();
 app.UseAuthentication();   
 app.UseAuthorization();
 
