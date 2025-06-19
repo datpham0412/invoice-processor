@@ -17,21 +17,30 @@ public class InvoicesController : ControllerBase
 
     private string ToFullUrl(string blobUrl)
     {
-        // If it's already absolute and not an Azure blob, just return it
-        if (Uri.IsWellFormedUriString(blobUrl, UriKind.Absolute) &&
-            !blobUrl.Contains(".blob.core.windows.net", StringComparison.OrdinalIgnoreCase))
-            return blobUrl;
-
-        // Rewrite raw Azure blob to proxy route
-        if (blobUrl.Contains(".blob.core.windows.net", StringComparison.OrdinalIgnoreCase))
+        if (blobUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
         {
-            var filename = Uri.EscapeDataString(Path.GetFileName(blobUrl));
-            blobUrl = $"/api/invoices/file/{filename}";
+            // If it's a raw Azure Blob URL, convert it
+            if (blobUrl.Contains(".blob.core.windows.net"))
+            {
+                var filename = Path.GetFileName(blobUrl);
+                var encoded = Uri.EscapeDataString(filename);
+                blobUrl = $"/api/invoices/file/{encoded}";
+            }
+            else
+            {
+                if (blobUrl.StartsWith("http://") && !blobUrl.Contains("localhost"))
+                    return "https://" + blobUrl.Substring("http://".Length);
+                return blobUrl; 
+            }
         }
 
-        // Make relative URL absolute
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
-        return blobUrl.StartsWith('/') ? $"{baseUrl}{blobUrl}" : $"{baseUrl}/{blobUrl}";
+        // For localhost, use http
+        // var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+        // Convert relative path to full URL
+        var scheme = Request.Host.Host.Contains("localhost") ? "http" : "https";
+        var baseUrl = $"{scheme}://{Request.Host}";
+        return $"{baseUrl}{(blobUrl.StartsWith('/') ? "" : "/")}{blobUrl}";
     }
 
     // GET /api/invoices
