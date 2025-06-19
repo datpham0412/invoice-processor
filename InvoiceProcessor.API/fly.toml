@@ -1,0 +1,30 @@
+# fly.toml app configuration file generated for invoice-backend-snowy-shape-2157 on 2025-06-19T18:37:07+10:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'invoice-backend-snowy-shape-2157'
+primary_region = 'syd'
+
+[build]
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+  handlers = ["http"]
+  port = 8080
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+[env]
+  DISABLE_HTTPS_REDIRECT = "true"
+  JWT__Issuer            = "InvoiceAPI"
+  JWT__Audience          = "InvoiceAPIUser"
+  JWT__ExpiresInMinutes  = "60"
+
