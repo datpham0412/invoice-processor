@@ -11,6 +11,7 @@ import {
     } from "../components/ui/card"
     import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { FileText, BarChart3, CheckCircle, Mail, Lock, User, Eye, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 
 export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -21,28 +22,40 @@ export default function AuthPage() {
   const [userName, setUserName] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [signupLoading, setSignupLoading] = useState(false)
 
   const handleSignup = async (e) => {
     e.preventDefault()
-    if (password !== confirmPassword) return alert("Passwords do not match")
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match")
+      return
+    }
+    setSignupLoading(true)
     try {
       await api.post("/auth/register", { userName, password })
-      alert("Account created — please log in")
+      toast.success("Account created! You can now log in.")
       setTab("signin")
     } catch (err) {
-      if (err.response?.status === 409) alert("User already exists")
-      else alert("Registration failed")
+      if (err.response?.status === 409) toast.error("User already exists")
+      else toast.error("Registration failed. Please try again.")
+    } finally {
+      setSignupLoading(false)
     }
   }
 
   const handleLogin = async (e) => {
     e.preventDefault()
+    setLoginLoading(true)
     try {
       const res = await api.post("/auth/login", { userName, password })
       localStorage.setItem("token", res.data.token)
+      toast.success("Login successful!")
       nav("/upload-invoice")
     } catch (err) {
-      alert("Invalid credentials")
+      toast.error("Invalid credentials")
+    } finally {
+      setLoginLoading(false)
     }
   }
 
@@ -67,9 +80,7 @@ export default function AuthPage() {
           </div>
           <div className="space-y-6">
             <Feature icon={<CheckCircle style={{ color: 'white' }} />} title="Automated Matching" desc="Instantly match purchase orders with invoices using AI-powered recognition." />
-            <Feature icon={<BarChart3 style={{ color: 'white' }}/>} title="Real-time Analytics" desc="Track spending patterns and vendor performance with detailed insights.
-
-Document Management" />
+            <Feature icon={<BarChart3 style={{ color: 'white' }}/>} title="Real-time Analytics" desc="Track spending patterns and vendor performance with detailed insights.\n\nDocument Management" />
             <Feature icon={<FileText style={{ color: 'white' }}/>} title="Document Management" desc="Organize and store all your invoices and purchase orders in one place." />
           </div>
         </div>
@@ -160,8 +171,21 @@ Document Management" />
                             </a>
                         </div>
 
-                        <Button className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium transition-all duration-200 transform hover:scale-[1.02]">
-                        Sign In
+                        <Button
+                          className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium transition-all duration-200 transform hover:scale-[1.02]"
+                          disabled={loginLoading}
+                        >
+                          {loginLoading ? (
+                            <span className="flex items-center justify-center">
+                              <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                              </svg>
+                              Signing In...
+                            </span>
+                          ) : (
+                            "Sign In"
+                          )}
                         </Button>
                     </form>
                     </TabsContent>
@@ -241,8 +265,21 @@ Document Management" />
                             </span>
                         </div>
 
-                        <Button className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium transition-all duration-200 transform hover:scale-[1.02]">
-                        Create Account
+                        <Button
+                          className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium transition-all duration-200 transform hover:scale-[1.02]"
+                          disabled={signupLoading}
+                        >
+                          {signupLoading ? (
+                            <span className="flex items-center justify-center">
+                              <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                              </svg>
+                              Creating Account...
+                            </span>
+                          ) : (
+                            "Create Account"
+                          )}
                         </Button>
                     </form>
                     </TabsContent>
