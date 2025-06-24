@@ -3,16 +3,15 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import CreatePOPage from './pages/CreatePOPage';
 import UploadInvoicePage from './pages/UploadInvoicePage';
 import ResultPage from './pages/ResultPage';
-import LoginPage from './pages/LoginPage';
-import SignUpPage from './pages/SignUpPage';
 import InvoicesPage from './pages/InvoicesPage';
 import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
 import NavBar from './components/NavBar';
+import AuthPage from './pages/AuthPage';
 
 // Wrapper for protecting routes
 const RequireAuth = ({ children }) => {
   const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/login" replace />;
+  return token ? children : <Navigate to="/auth" replace />;
 };
 
 function App() {
@@ -22,7 +21,7 @@ function App() {
 
   const logout = () => {
     localStorage.removeItem('token');
-    navigate('/login');
+    navigate('/auth');
   };
 
   return (
@@ -30,9 +29,7 @@ function App() {
       {token && <NavBar />}
       <Routes>
         {/* Public login route */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
-        
+        <Route path="/auth" element={<AuthPage />} />
         {/* Protected routes */}
         <Route
           path="/"
@@ -76,7 +73,7 @@ function App() {
         />
 
         {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     </>
   );
