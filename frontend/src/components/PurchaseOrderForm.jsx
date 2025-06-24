@@ -41,94 +41,100 @@ function PurchaseOrderForm({ onSubmit, isLoading }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form">
-      <div className="form-group">
-        <label>
+    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-md w-full max-w-3xl mx-auto space-y-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           PO Number:
-          <input 
-            value={poNumber} 
-            onChange={e => setPoNumber(e.target.value)} 
-            required 
-            className="form-control"
-          />
         </label>
+        <input
+          value={poNumber}
+          onChange={e => setPoNumber(e.target.value)}
+          required
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
-      <div className="form-group">
-        <label>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Vendor Name:
-          <input 
-            value={vendorName} 
-            onChange={e => setVendorName(e.target.value)} 
-            required 
-            className="form-control"
-          />
         </label>
+        <input
+          value={vendorName}
+          onChange={e => setVendorName(e.target.value)}
+          required
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
-      <div className="form-group">
-        <label>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Issue Date:
-          <input 
-            type="date" 
-            value={issueDate} 
-            onChange={e => setIssueDate(e.target.value)} 
-            required 
-            className="form-control"
-          />
         </label>
+        <input
+          type="date"
+          value={issueDate}
+          onChange={e => setIssueDate(e.target.value)}
+          required
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
-      <h3>Line Items</h3>
-      {lineItems.map((item, index) => (
-        <div key={index} className="line-item">
-          <input
-            placeholder="Description"
-            value={item.description}
-            onChange={e => handleLineItemChange(index, 'description', e.target.value)}
-            required
-            className="form-control"
-          />
-          <input
-            type="number"
-            placeholder="Quantity"
-            value={item.quantity}
-            onChange={e => handleLineItemChange(index, 'quantity', e.target.value)}
-            required
-            min="0"
-            step="0.01"
-            className="form-control"
-          />
-          <input
-            type="number"
-            placeholder="Unit Price"
-            value={item.unitPrice}
-            onChange={e => handleLineItemChange(index, 'unitPrice', e.target.value)}
-            required
-            min="0"
-            step="0.01"
-            className="form-control"
-          />
-          {lineItems.length > 1 && (
-            <button 
-              type="button" 
-              onClick={() => removeLineItem(index)}
-              className="btn btn-danger"
-            >
-              Remove
-            </button>
-          )}
-        </div>
-      ))}
-      
-      <div className="button-group">
-        <button type="button" onClick={addLineItem} className="btn btn-secondary">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">Line Items</h3>
+        {lineItems.map((item, index) => (
+          <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
+            <input
+              placeholder="Description"
+              value={item.description}
+              onChange={e => handleLineItemChange(index, 'description', e.target.value)}
+              required
+              className="p-3 border border-gray-300 rounded-md w-full"
+            />
+            <input
+              type="number"
+              placeholder="Quantity"
+              value={item.quantity}
+              onChange={e => handleLineItemChange(index, 'quantity', e.target.value)}
+              required
+              min="0"
+              step="0.01"
+              className="p-3 border border-gray-300 rounded-md w-full"
+            />
+            <input
+              type="number"
+              placeholder="Unit Price"
+              value={item.unitPrice}
+              onChange={e => handleLineItemChange(index, 'unitPrice', e.target.value)}
+              required
+              min="0"
+              step="0.01"
+              className="p-3 border border-gray-300 rounded-md w-full"
+            />
+            {lineItems.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeLineItem(index)}
+                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <button
+          type="button"
+          onClick={addLineItem}
+          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
+        >
           Add Line Item
         </button>
-        <button 
-          type="submit" 
-          className="btn btn-primary"
+        <button
+          type="submit"
           disabled={isLoading}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition disabled:opacity-60"
         >
           {isLoading ? 'Submitting...' : 'Submit PO'}
         </button>
@@ -137,4 +143,4 @@ function PurchaseOrderForm({ onSubmit, isLoading }) {
   );
 }
 
-export default PurchaseOrderForm; 
+export default PurchaseOrderForm;
