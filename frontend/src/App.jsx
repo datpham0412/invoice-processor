@@ -7,6 +7,7 @@ import InvoicesPage from './pages/InvoicesPage';
 import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
 import NavBar from './components/NavBar';
 import AuthPage from './pages/AuthPage';
+import { Toaster } from './components/ui/sonner';
 
 // Wrapper for protecting routes
 const RequireAuth = ({ children }) => {
@@ -75,6 +76,7 @@ function App() {
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
+      <Toaster />
     </>
   );
 }
