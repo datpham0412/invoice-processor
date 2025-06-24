@@ -8,7 +8,6 @@ import SignUpPage from './pages/SignUpPage';
 import InvoicesPage from './pages/InvoicesPage';
 import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
 import NavBar from './components/NavBar';
-import './App.css';
 
 // Wrapper for protecting routes
 const RequireAuth = ({ children }) => {
