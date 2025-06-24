@@ -1,50 +1,27 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import PurchaseOrderForm from '../components/PurchaseOrderForm';
-import api from '../api/api';
+import PurchaseOrderForm from '../components/PurchaseOrderForm'; // Adjust import path as needed
+import api from '../api/api'; // Axios wrapper
 
-function CreatePOPage() {
+export default function CreatePOPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [response, setResponse] = useState(null);
-  const navigate = useNavigate();
 
   const handleSubmit = async (payload) => {
     setIsLoading(true);
-    setError(null);
-
     try {
-      const { data } = await api.post('/purchaseorders', payload);
-      setResponse(data);
-      // Navigate to upload invoice page after successful PO creation
-      navigate('/upload-invoice');
+      const res = await api.post('/purchaseorders', payload);
+      alert('Purchase Order submitted successfully!');
+      console.log('Response:', res.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit PO');
-      console.error(err);
+      console.error('Failed to submit PO', err);
+      alert('Failed to submit purchase order');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="container">
-      <h1>Create Purchase Order</h1>
+    <div className="min-h-screen bg-gray-50 p-6">
       <PurchaseOrderForm onSubmit={handleSubmit} isLoading={isLoading} />
-
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
-
-      {response && (
-        <div className="response-section">
-          <h3>Response</h3>
-          <pre>{JSON.stringify(response, null, 2)}</pre>
-        </div>
-      )}
     </div>
   );
 }
-
-export default CreatePOPage; 
