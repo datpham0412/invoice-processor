@@ -40,86 +40,96 @@ export default function PurchaseOrdersPage() {
   if (loading) return <p>Loading…</p>;
 
   return (
-    <div className="container">
-      <h2>My Purchase Orders</h2>
-      {rows.length === 0 ? (
-        <p>No POs yet.</p>
-      ) : (
-        <table border="1" cellPadding="6" style={{ width: '100%', marginBottom: '20px' }}>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Vendor</th>
-              <th>Total</th>
-              <th>Issue Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(po => {
-              const isOpen = expandedRow === po.id;
-              const lineData = po.lineItems?.length ? po.lineItems
-                             : linesCache[po.id] ? linesCache[po.id]
-                             : [];
+    <div className="min-h-screen px-4 py-10 bg-gray-50">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">My Purchase Orders</h2>
 
-              return (
-                <React.Fragment key={po.id}>
-                  {/* main row */}
-                  <tr onClick={() => toggleRow(po)} style={{ cursor: 'pointer' }}>
-                    <td>{po.poNumber}</td>
-                    <td>{po.vendorName}</td>
-                    <td>${po.totalAmount.toFixed(2)}</td>
-                    <td>{new Date(po.issueDate).toLocaleDateString()}</td>
-                    <td>
-                      <button
-                        onClick={e => { 
-                          e.stopPropagation(); 
-                          // Add any actions you want here
-                        }}
-                        style={{ marginRight: '8px' }}
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
+        {rows.length === 0 ? (
+          <p className="text-gray-600">No POs yet.</p>
+        ) : (
+          <div className="overflow-x-auto shadow border border-gray-200 rounded-lg">
+            <table className="min-w-full text-sm text-left text-gray-700">
+              <thead className="bg-gray-100 border-b text-xs uppercase font-semibold text-gray-600">
+                <tr>
+                  <th className="px-4 py-3">#</th>
+                  <th className="px-4 py-3">Vendor</th>
+                  <th className="px-4 py-3">Total</th>
+                  <th className="px-4 py-3">Issue Date</th>
+                  <th className="px-4 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((po) => {
+                  const isOpen = expandedRow === po.id;
+                  const lineData =
+                    po.lineItems?.length || linesCache[po.id]
+                      ? po.lineItems || linesCache[po.id]
+                      : [];
 
-                  {/* expandable detail row */}
-                  {isOpen && (
-                    <tr>
-                      <td colSpan={5} style={{ background: '#f9f9f9' }}>
-                        {lineData.length === 0
-                          ? <em>No line items</em>
-                          : (
-                            <table border="1" cellPadding="4" style={{ width: '100%' }}>
-                              <thead>
-                                <tr>
-                                  <th>Description</th>
-                                  <th>Qty</th>
-                                  <th>Unit Price</th>
-                                  <th>Amount</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {lineData.map(item => (
-                                  <tr key={item.id}>
-                                    <td>{item.description}</td>
-                                    <td>{item.quantity}</td>
-                                    <td>${item.unitPrice.toFixed(2)}</td>
-                                    <td>${item.amount.toFixed(2)}</td>
+                  return (
+                    <React.Fragment key={po.id}>
+                      {/* Main row */}
+                      <tr className="hover:bg-gray-50 border-b">
+                        <td className="px-4 py-2">{po.poNumber}</td>
+                        <td className="px-4 py-2">{po.vendorName}</td>
+                        <td className="px-4 py-2">${po.totalAmount.toFixed(2)}</td>
+                        <td className="px-4 py-2">
+                          {new Date(po.issueDate).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleRow(po);
+                          }}
+                          className="text-blue-600 hover:text-blue-800 underline font-medium"
+                        >
+                          {isOpen ? 'Hide Details' : 'View Details'}
+                        </button>
+                        </td>
+                      </tr>
+
+                      {/* Expandable detail row */}
+                      {isOpen && (
+                        <tr className="bg-gray-50 border-t">
+                        <td colSpan="5" className="px-4 py-4">
+                          <div className="rounded-md border border-gray-200 p-4 bg-white shadow-sm">
+                            {lineData.length === 0 ? (
+                              <em className="text-gray-500">No line items</em>
+                            ) : (
+                              <table className="w-full text-sm text-left text-gray-700">
+                                <thead className="bg-gray-100 text-xs uppercase text-gray-600 font-medium">
+                                  <tr>
+                                    <th className="px-4 py-2">Description</th>
+                                    <th className="px-4 py-2">Qty</th>
+                                    <th className="px-4 py-2">Unit Price</th>
+                                    <th className="px-4 py-2">Amount</th>
                                   </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          )}
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+                                </thead>
+                                <tbody>
+                                  {lineData.map((item) => (
+                                    <tr key={item.id} className="border-t">
+                                      <td className="px-4 py-2">{item.description}</td>
+                                      <td className="px-4 py-2">{item.quantity}</td>
+                                      <td className="px-4 py-2">${item.unitPrice.toFixed(2)}</td>
+                                      <td className="px-4 py-2">${item.amount.toFixed(2)}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 } 
