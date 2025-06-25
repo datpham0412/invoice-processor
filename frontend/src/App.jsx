@@ -5,8 +5,8 @@ import UploadInvoicePage from './pages/UploadInvoicePage';
 import ResultPage from './pages/ResultPage';
 import InvoicesPage from './pages/InvoicesPage';
 import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
-import NavBar from './components/NavBar';
 import AuthPage from './pages/AuthPage';
+import LandingPage from './pages/LandingPage';
 import { Toaster } from './components/ui/sonner';
 
 // Wrapper for protecting routes
@@ -27,13 +27,14 @@ function App() {
 
   return (
     <>
-      {token && <NavBar />}
       <Routes>
-        {/* Public login route */}
+        {/* Public routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={<AuthPage />} />
+
         {/* Protected routes */}
         <Route
-          path="/"
+          path="/create-po"
           element={
             <RequireAuth>
               <CreatePOPage />
@@ -73,8 +74,8 @@ function App() {
           }
         />
 
-        {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/auth" replace />} />
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />
     </>
