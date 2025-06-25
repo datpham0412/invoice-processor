@@ -51,7 +51,7 @@ export default function AuthPage() {
       const res = await api.post("/auth/login", { userName, password })
       localStorage.setItem("token", res.data.token)
       toast.success("Login successful!")
-      nav("/upload-invoice")
+      nav("/")
     } catch (err) {
       toast.error("Invalid credentials")
     } finally {
