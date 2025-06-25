@@ -84,6 +84,71 @@ export default function AuthPage() {
             <Feature icon={<FileText style={{ color: 'white' }}/>} title="Document Management" desc="Organize and store all your invoices and purchase orders in one place." />
           </div>
         </div>
+
+        <div className="relative z-0 flex items-center justify-center mt-8 mb-8">
+          <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden max-w-sm w-full">
+            {/* Mock App Interface */}
+            <div className="bg-white/20 backdrop-blur-sm px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-white/30 rounded-lg flex items-center justify-center">
+                  <FileText className="w-3 h-3 text-white" />
+                </div>
+                <span className="text-white font-semibold text-sm">MatchFlow Dashboard</span>
+              </div>
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+              </div>
+            </div>
+
+            <div className="p-4 space-y-3">
+              {/* Step 1: Create PO */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-white/30 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">1</span>
+                  </div>
+                  <span className="text-xs font-semibold text-white/90">Create PO</span>
+                </div>
+                <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                  <div className="space-y-1">
+                    <div className="h-1.5 bg-white/30 rounded w-3/4"></div>
+                    <div className="h-1.5 bg-white/30 rounded w-1/2"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2: Upload Invoice */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-white/30 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">2</span>
+                  </div>
+                  <span className="text-xs font-semibold text-white/90">Upload Invoice</span>
+                </div>
+                <div className="bg-white/10 rounded-lg p-2 border border-white/20 text-center">
+                  <div className="text-xs text-white/80">Drop files here</div>
+                  <div className="h-1 bg-white/40 rounded w-2/3 mx-auto mt-1"></div>
+                </div>
+              </div>
+
+              {/* Step 3: Auto Match */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-green-400/80 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">3</span>
+                  </div>
+                  <span className="text-xs font-semibold text-white/90">Auto-Match</span>
+                </div>
+                <div className="bg-green-400/20 rounded-lg p-2 border border-green-400/30">
+                  <div className="text-xs text-green-200 text-center font-semibold">✓ 100% Match Found</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div className="relative z-10">
           <blockquote className="text-white/90 text-lg italic">
             "MatchFlow transformed our accounts payable process, reducing processing time by 75%."
