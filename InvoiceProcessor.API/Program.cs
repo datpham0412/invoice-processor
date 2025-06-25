@@ -14,8 +14,13 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using InvoiceProcessor.API.Infrastructure.Services;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Data.SqlClient;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+SqlConnection.ClearAllPools();
+
 
 // Add services to the container.
 
@@ -32,7 +37,7 @@ builder.Services.AddSwaggerGen(c =>
     // ✅ Add JWT support to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
     {
-        Type = SecuritySchemeType.Http,   // 👈 switch from ApiKey → Http
+        Type = SecuritySchemeType.Http,   
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
