@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, BarChart3, Upload, FolderOpen, ArrowRight, Menu, X, Star, Zap, Target, Users } from "lucide-react"
+import LogOutButton from "@/components/ui/logOutButton"
 
 export default function LandingPage() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -24,12 +25,6 @@ export default function LandingPage() {
     const token = localStorage.getItem('token')
     setIsAuthenticated(!!token)
   }, [])
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    setIsAuthenticated(false)
-    navigate('/auth')
-  }
 
   const handleLogin = () => {
     navigate('/auth')
@@ -73,17 +68,15 @@ export default function LandingPage() {
               </a>
               {!isAuthenticated ? (
                 <>
-                  <Button variant="ghost" className="text-gray-700 hover:text-blue-600" onClick={handleLogin}>
+                  <Button variant="ghost" className="text-base font-medium text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={handleLogin}>
                     Login
                   </Button>
-                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleSignup}>
+                  <Button className="text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleSignup}>
                     Sign Up
                   </Button>
                 </>
               ) : (
-                <Button variant="ghost" className="text-gray-700 hover:text-red-600" onClick={handleLogout}>
-                  Log Out
-                </Button>
+                <LogOutButton setIsAuthenticated={setIsAuthenticated} navigate={navigate} />
               )}
             </div>
 
