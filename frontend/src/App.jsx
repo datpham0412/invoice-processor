@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import CreatePOPage from './pages/CreatePOPage';
 import UploadInvoicePage from './pages/UploadInvoicePage';
@@ -7,24 +7,53 @@ import InvoicesPage from './pages/InvoicesPage';
 import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
-import { Toaster } from './components/ui/sonner';
 import DashboardPage from './pages/DashboardPage';
+import { Toaster } from './components/ui/sonner';
+import api from './api/api';
+import { scheduleProactiveRefresh, logoutAndRedirect } from './utils/tokenService';
 
 // Wrapper for protecting routes
 const RequireAuth = ({ children }) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   return token ? children : <Navigate to="/auth" replace />;
 };
 
 function App() {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
-  const username = token ? JSON.parse(atob(token.split('.')[1]))?.unique_name : null;
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    scheduleProactiveRefresh();
+  }, []);
+
+  useEffect(() => {
+    const onSuccess = response => {
+      setIsRefreshing(false);
+      return response;
+    };
+    const onError = error => {
+      if (error.config?._retry) {
+        setIsRefreshing(true);
+      }
+      setIsRefreshing(false);
+      return Promise.reject(error);
+    };
+
+    const resInterceptor = api.interceptors.response.use(onSuccess, onError);
+    return () => api.interceptors.response.eject(resInterceptor);
+  }, []);
 
   const logout = () => {
-    localStorage.removeItem('token');
-    navigate('/auth');
+    logoutAndRedirect();
   };
+
+  if (isRefreshing) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
+        <div className="loader">Loading…</div>
+      </div>
+    );
+  }
 
   return (
     <>
