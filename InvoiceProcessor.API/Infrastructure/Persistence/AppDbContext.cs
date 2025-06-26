@@ -13,7 +13,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
         public DbSet<PurchaseOrder>? PurchaseOrders { get; set; }
         public DbSet<ExceptionRecord>? ExceptionRecords { get; set; }
         public DbSet<AppUser>? Users { get; set; }
-
+        public DbSet<RefreshToken>? RefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
