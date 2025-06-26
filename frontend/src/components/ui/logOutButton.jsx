@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 
 export default function LogOutButton({ setIsAuthenticated, navigate }) {
   const handleLogout = () => {
-    localStorage.removeItem('token'); 
+    localStorage.removeItem('accessToken'); 
+    localStorage.removeItem('refreshToken');
     setIsAuthenticated(false); 
     navigate('/auth'); 
   };
