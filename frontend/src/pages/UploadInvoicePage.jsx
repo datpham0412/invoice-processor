@@ -94,7 +94,7 @@ export default function UploadInvoicePage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link to="/" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 mb-4 transition-colors">
+          <Link to="/dashboard" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Link>
