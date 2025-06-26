@@ -8,3 +8,4 @@ namespace InvoiceProcessor.API.Infrastructure.Settings
         public int    ExpiresInMinutes { get; init; } = 60;
     }
 }
+ 
