@@ -1,58 +1,66 @@
 // src/utils/tokenService.js
-import axios from 'axios';
+import api from '../api/api'
 
-let refreshTimeout = null;
+let refreshTimeout = null
 
 // schedule a background refresh
 export function scheduleProactiveRefresh() {
-  const raw = localStorage.getItem('accessToken');
-  if (!raw) return;
+  const raw = localStorage.getItem('accessToken')
+  if (!raw) return
 
-  let expMs;
+  let expMs
   try {
-    expMs = JSON.parse(atob(raw.split('.')[1])).exp * 1000;
+    expMs = JSON.parse(atob(raw.split('.')[1])).exp * 1000
   } catch {
-    console.warn('Malformed token');
-    return;
+    console.warn('Malformed token')
+    return
   }
 
-  const now      = Date.now();
-  const timeLeft = expMs - now;
+  const now      = Date.now()
+  const timeLeft = expMs - now
 
   if (timeLeft <= 0) {
-    triggerRefresh();
-    return;
+    triggerRefresh()
+    return
   }
 
-  const buffer = Math.min(60_000, timeLeft / 2);
-  const msToRefresh = timeLeft - buffer;
+  const buffer      = Math.min(60_000, timeLeft / 2)
+  const msToRefresh = timeLeft - buffer
 
-  clearTimeout(refreshTimeout);
-  refreshTimeout = setTimeout(triggerRefresh, msToRefresh);
+  clearTimeout(refreshTimeout)
+  refreshTimeout = setTimeout(triggerRefresh, msToRefresh)
 }
 
 async function triggerRefresh() {
-  const rt = localStorage.getItem('refreshToken');
+  const rt = localStorage.getItem('refreshToken')
   if (!rt) {
-    logoutAndRedirect();
-    return;
+    logoutAndRedirect()
+    return
   }
 
   try {
-    const { data } = await axios.post('/api/auth/refresh', JSON.stringify(rt), {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    localStorage.setItem('accessToken', data.accessToken);
-    localStorage.setItem('refreshToken', data.refreshToken);
+    // note: baseURL is already '/api'
+    const { data } = await api.post(
+      '/auth/refresh',
+      // server still expects a raw string body:
+      JSON.stringify(rt),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
 
-    scheduleProactiveRefresh();
+    // swap in the new tokens
+    localStorage.setItem('accessToken', data.accessToken)
+    localStorage.setItem('refreshToken', data.refreshToken)
+
+    // schedule the next refresh cycle
+    scheduleProactiveRefresh()
   } catch {
-    logoutAndRedirect();
+    logoutAndRedirect()
   }
 }
 
 export function logoutAndRedirect() {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-  window.location.href = '/auth?expired=1';
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
+  // send user back to the login page
+  window.location.href = '/auth'
 }
