@@ -204,6 +204,32 @@ namespace InvoiceProcessor.API.Migrations
                     b.ToTable("PurchaseOrders");
                 });
 
+            modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("Revoked")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("InvoiceProcessor.API.Domain.Entities.ExceptionRecord", b =>
                 {
                     b.HasOne("InvoiceProcessor.API.Domain.Entities.Invoice", "Invoice")
