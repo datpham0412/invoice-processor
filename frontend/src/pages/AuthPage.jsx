@@ -12,6 +12,7 @@ import {
     import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { FileText, BarChart3, CheckCircle, Mail, Lock, User, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
+import { scheduleProactiveRefresh } from "../utils/tokenService"
 
 export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -48,8 +49,13 @@ export default function AuthPage() {
     e.preventDefault()
     setLoginLoading(true)
     try {
-      const res = await api.post("/auth/login", { userName, password })
-      localStorage.setItem("token", res.data.token)
+      const { data } = await api.post("/auth/login", { userName, password })
+
+      localStorage.setItem("accessToken",  data.accessToken)
+      localStorage.setItem("refreshToken", data.refreshToken)
+
+      scheduleProactiveRefresh()
+
       toast.success("Login successful!")
       nav("/")
     } catch (err) {
