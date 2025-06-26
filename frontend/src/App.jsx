@@ -8,6 +8,7 @@ import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
 import { Toaster } from './components/ui/sonner';
+import DashboardPage from './pages/DashboardPage';
 
 // Wrapper for protecting routes
 const RequireAuth = ({ children }) => {
@@ -38,6 +39,14 @@ function App() {
           element={
             <RequireAuth>
               <CreatePOPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <DashboardPage />
             </RequireAuth>
           }
         />
