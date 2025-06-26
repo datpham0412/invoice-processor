@@ -52,7 +52,21 @@ public class AuthController : ControllerBase
             signingCredentials: creds
         );
 
-        return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+        var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+        var refreshToken = new RefreshToken {
+            UserId  = user.Id,
+            Token   = Guid.NewGuid().ToString("N"),
+            Expires = DateTime.UtcNow.AddDays(7)
+        };
+
+        _ctx.RefreshTokens!.Add(refreshToken);
+        _ctx.SaveChanges();
+
+        return Ok(new {
+            accessToken,                    
+            refreshToken = refreshToken.Token 
+        });
     }
     [HttpPost("register")]
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
@@ -74,6 +88,70 @@ public class AuthController : ControllerBase
         await _ctx.SaveChangesAsync();
 
         return StatusCode(201);
+    }
+
+    [HttpPost("refresh")]
+    public IActionResult Refresh([FromBody] string refreshToken)
+    {
+        var existing = _ctx.RefreshTokens!
+            .SingleOrDefault(r => r.Token == refreshToken);
+
+        if (existing == null 
+            || existing.Revoked != null 
+            || existing.Expires < DateTime.UtcNow)
+        {
+            return Unauthorized();
+        }
+
+        existing.Revoked = DateTime.UtcNow;
+
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, existing.UserId!),
+        };
+        var key   = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var jwt   = new JwtSecurityToken(
+            issuer:             _jwt.Issuer,
+            audience:           _jwt.Audience,
+            claims:             claims,
+            expires:            DateTime.UtcNow.AddMinutes(_jwt.ExpiresInMinutes),
+            signingCredentials: creds
+        );
+
+        var newAccessToken = new JwtSecurityTokenHandler().WriteToken(jwt);
+
+        var newRt = new RefreshToken
+        {
+            UserId  = existing.UserId,
+            Token   = Guid.NewGuid().ToString("N"),
+            Expires = DateTime.UtcNow.AddDays(7)
+        };
+
+        _ctx.RefreshTokens!.Add(newRt);
+        _ctx.SaveChanges();
+
+        // return both tokens
+        return Ok(new
+        {
+            accessToken  = newAccessToken,
+            refreshToken = newRt.Token
+        });
+    }
+
+    [HttpPost("revoke")]
+    public IActionResult Revoke([FromBody] string refreshToken)
+    {
+        var existing = _ctx.RefreshTokens!
+            .SingleOrDefault(r => r.Token == refreshToken);
+
+        if (existing == null)
+            return NotFound(new { message = "Refresh token not found" });
+
+        existing.Revoked = DateTime.UtcNow;
+        _ctx.SaveChanges();
+
+        return NoContent();
     }
 }
 
