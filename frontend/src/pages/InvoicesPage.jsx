@@ -1,235 +1,339 @@
-import React, { useEffect, useState } from 'react';
-import api from '../api/api';
-import { invoiceStatusMap, statusColorMap } from '../invoiceStatusMap';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api/api";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  FileText,
+  ArrowLeft,
+  Search,
+  Download,
+  Eye,
+  ChevronDown,
+  ChevronRight,
+  Filter,
+} from "lucide-react";
+
+const rawToGroup = {
+  Pending: "Pending",
+  Matched: "Matched",
+  MatchedByInvoiceNumber: "Matched",
+  Discrepancy: "Discrepancy",
+  FallbackVendorMismatch: "Discrepancy",
+  UnmatchedNoPO: "Failed",
+  FallbackInvoiceNotFound: "Failed",
+};
+
+const groupConfig = {
+  Pending: { color: "bg-gray-100 text-gray-800 border-gray-200" },
+  Matched: { color: "bg-green-100 text-green-800 border-green-200" },
+  Discrepancy: { color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+  Failed: { color: "bg-red-100 text-red-800 border-red-200" },
+};
 
 export default function InvoicesPage() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [pdfUrl, setPdfUrl] = useState(null);
-  const [expandedRow, setExpandedRow] = useState(null);      // invoice ID or null
-  const [linesCache, setLinesCache] = useState({});         // { id: [ ...lineItems ] }
+  const [invoices, setInvoices] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selected, setSelected] = useState("All Status");
+  const [expanded, setExpanded] = useState(new Set());
+  const [loading, setLoading] = useState(false);
+
+  const buckets = ["All Status", "Pending", "Matched", "Discrepancy", "Failed"];
 
   useEffect(() => {
-    api.get('/invoices')
-       .then(res => setRows(res.data))
-       .finally(() => setLoading(false));
+    setLoading(true);
+    api.get("/invoices")
+      .then(res => {
+        setInvoices(res.data);
+        setFiltered(res.data);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  // Handle PDF preview
   useEffect(() => {
-    if (!selectedInvoice) {
-      setPdfUrl(null);
-      return;
+    let arr = invoices.filter(inv =>
+      inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inv.vendorName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    if (selected !== "All Status") {
+      arr = arr.filter(inv => rawToGroup[inv.status] === selected);
     }
+    setFiltered(arr);
+  }, [searchTerm, selected, invoices]);
 
-    let localUrl;
-    api.get(selectedInvoice.blobUrl, { responseType: 'blob' })
-       .then(r => {
-         localUrl = URL.createObjectURL(r.data);
-         setPdfUrl(localUrl);
-       })
-       .catch(err => {
-         console.error('Failed to load PDF:', err);
-         setPdfUrl(null);
-       });
+  const toggleRow = id => {
+    const s = new Set(expanded);
+    s.has(id) ? s.delete(id) : s.add(id);
+    setExpanded(s);
+  };
 
-    return () => {
-      if (localUrl) URL.revokeObjectURL(localUrl);
-    };
-  }, [selectedInvoice]);
-
-  async function handleDownload(inv) {
+  const download = async inv => {
+    setLoading(true);
     try {
-      const res = await api.get(inv.blobUrl, { responseType: 'blob' });
-      const href = URL.createObjectURL(res.data);
-
-      const link = document.createElement('a');
-      link.href = href;
-      // nice file name e.g. "PO-1238.pdf"
-      link.download = inv.invoiceNumber ? `${inv.invoiceNumber}.pdf` : 'invoice.pdf';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(href);
-    } catch (err) {
-      console.error('Download failed', err);
-      alert('Could not download file');
+      const res = await api.get(inv.blobUrl, { responseType: "blob" });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${inv.invoiceNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      console.error("Download failed");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  async function toggleRow(inv) {
-    // collapse if clicking the same row
-    if (expandedRow === inv.id) {
-      setExpandedRow(null);
-      return;
-    }
-
-    // if we already have the lines (either cached or included), just expand
-    if (inv.lineItems?.length || linesCache[inv.id]) {
-      setExpandedRow(inv.id);
-      return;
-    }
-
-    // otherwise fetch them once
-    try {
-      const { data } = await api.get(`/invoices/${inv.id}/items`);
-      setLinesCache(prev => ({ ...prev, [inv.id]: data }));
-      setExpandedRow(inv.id);
-    } catch (err) {
-      console.error('Could not load line items', err);
-      alert('Failed to load items');
-    }
-  }
-
-  if (loading) return <p>Loading…</p>;
+  const badge = inv => {
+    const grp = rawToGroup[inv.status] || "Pending";
+    const cfg = groupConfig[grp];
+    return <Badge
+    className={`${groupConfig[ rawToGroup[inv.status] ].color} border font-medium text-xs rounded-full px-2 py-1 flex-shrink-0`}
+  >
+    { rawToGroup[inv.status] }
+  </Badge>;
+  };
 
   return (
-    <div className="min-h-screen px-4 py-10 bg-gray-50">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">My Invoices</h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 lg:p-8">
+      <div className="fixed top-20 left-20 w-32 h-32 bg-blue-200/30 rounded-full blur-xl animate-pulse pointer-events-none" />
+      <div
+        className="fixed bottom-20 right-20 w-40 h-40 bg-indigo-200/30 rounded-full blur-xl animate-pulse pointer-events-none"
+        style={{ animationDelay: "1s" }}
+      />
 
-    {rows.length === 0 ? (
-      <p className="text-gray-600">No invoices yet.</p>
-    ) : (
-      <>
-        <div className="overflow-x-auto shadow border border-gray-200 rounded-lg">
-          <table className="min-w-full text-sm text-left text-gray-700">
-            <thead className="bg-gray-100 border-b text-xs uppercase font-semibold text-gray-600">
-              <tr>
-                <th className="px-4 py-3">#</th>
-                <th className="px-4 py-3">Vendor</th>
-                <th className="px-4 py-3">Total</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((inv) => {
-                const isOpen = expandedRow === inv.id;
-                const lineData =
-                  inv.lineItems?.length || linesCache[inv.id]
-                    ? inv.lineItems || linesCache[inv.id]
-                    : [];
-
-                return (
-                  <React.Fragment key={inv.id}>
-                    {/* Main row */}
-                    <tr
-                      onClick={() => toggleRow(inv)}
-                      className="hover:bg-gray-50 cursor-pointer border-b"
-                    >
-                      <td className="px-4 py-2">{inv.invoiceNumber}</td>
-                      <td className="px-4 py-2">{inv.vendorName}</td>
-                      <td className="px-4 py-2">${inv.totalAmount.toFixed(2)}</td>
-                      <td className={`px-4 py-2 font-semibold ${statusColorMap[inv.status] || ""}`}>
-                        {invoiceStatusMap[inv.status] || inv.status}
-                      </td>
-                      <td className="px-4 py-2">
-                        {new Date(inv.invoiceDate).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-2">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedInvoice(selectedInvoice?.id === inv.id ? null : inv);
-                            }}
-                            className="text-blue-600 hover:underline"
-                          >
-                            {selectedInvoice?.id === inv.id ? 'Hide PDF' : 'View PDF'}
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownload(inv);
-                            }}
-                            className="text-green-600 hover:underline"
-                          >
-                            Download
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Detail row */}
-                    {isOpen && (
-                      <tr className="bg-gray-50 border-t">
-                        <td colSpan="6" className="px-4 py-4">
-                          {lineData.length === 0 ? (
-                            <em className="text-gray-500">No line items</em>
-                          ) : (
-                            <table className="w-full text-sm text-left text-gray-700 border border-gray-200 rounded">
-                              <thead className="bg-gray-100 text-xs uppercase text-gray-600 font-medium">
-                                <tr>
-                                  <th className="px-4 py-2">Description</th>
-                                  <th className="px-4 py-2">Qty</th>
-                                  <th className="px-4 py-2">Unit Price</th>
-                                  <th className="px-4 py-2">Amount</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {lineData.map((item) => (
-                                  <tr key={item.id} className="border-t">
-                                    <td className="px-4 py-2">{item.description}</td>
-                                    <td className="px-4 py-2">{item.quantity}</td>
-                                    <td className="px-4 py-2">${item.unitPrice.toFixed(2)}</td>
-                                    <td className="px-4 py-2">${item.amount.toFixed(2)}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          )}
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <Link to="/dashboard" className="inline-flex items-center text-purple-600 hover:text-purple-700 mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Link>
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl shadow-2xl border border-white/20 overflow-hidden backdrop-blur-sm">
+            <div className="px-8 py-6 flex items-center space-x-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-white">All Invoices</h1>
+                <p className="text-purple-100 text-sm">View and manage all your uploaded invoices</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* PDF Preview */}
-        {selectedInvoice && (
-          <div className="mt-8 p-6 border border-gray-300 rounded-lg bg-white shadow">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                  Invoice Preview: {selectedInvoice.invoiceNumber}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  <strong>Vendor:</strong> {selectedInvoice.vendorName} <br />
-                  <strong>Total:</strong> ${selectedInvoice.totalAmount.toFixed(2)} <br />
-                  <strong>Date:</strong>{' '}
-                  {new Date(selectedInvoice.invoiceDate).toLocaleDateString()}
+        {/* Search & Filter */}
+        <Card className="mb-6 shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardContent>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search by invoice number or vendor name..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="pl-10 h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Filter className="w-4 h-4 text-gray-500" />
+                <select
+                  value={selected}
+                  onChange={e => setSelected(e.target.value)}
+                  className="h-12 px-3 border border-gray-200 rounded-md focus:border-purple-500 focus:ring-purple-500"
+                >
+                  {buckets.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Table */}
+        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              Invoices ({filtered.length})
+            </CardTitle>
+            <CardDescription className="text-gray-600">
+              Click on any invoice to expand or view details
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {filtered.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg mb-2">No invoices found</p>
+                <p className="text-gray-400 text-sm">
+                  {searchTerm || selected !== "All Status"
+                    ? "Try adjusting search or filter"
+                    : "Upload your first invoice"}
                 </p>
               </div>
-              <button
-                onClick={() => setSelectedInvoice(null)}
-                className="text-red-600 hover:text-red-800 font-medium"
-              >
-                Close Preview
-              </button>
-            </div>
-            {pdfUrl ? (
-              <iframe
-                src={pdfUrl}
-                width="100%"
-                height="600"
-                title={`Invoice ${selectedInvoice.invoiceNumber}`}
-                className="border border-gray-300 rounded-md"
-              />
             ) : (
-              <p className="text-gray-500">Loading PDF preview...</p>
-            )}
-          </div>
-        )}
-      </>
-    )}
-  </div>
-</div>
+              <div className="space-y-2">
+                {filtered.map((inv) => (
+                  <div key={inv.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                    {/* Main Row */}
+                    <div className="p-4 hover:bg-gray-50 transition-colors">
+                      <div className="grid grid-cols-12 gap-4 items-center">
+                        {/* 1) Expand/Collapse */}
+                        <div className="col-span-1 flex justify-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1"
+                            onClick={() => toggleRow(inv.id)}
+                          >
+                            {expanded.has(inv.id) ? (
+                              <ChevronDown className="w-4 h-4" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
 
+                        {/* 2) Invoice # + Vendor */}
+                        <div className="col-span-3">
+                          <h3 className="font-semibold text-gray-900">{inv.invoiceNumber}</h3>
+                          <p className="text-sm text-gray-600">{inv.vendorName}</p>
+                        </div>
+
+                        {/* 3) Amount + Date */}
+                        <div className="col-span-2 text-right">
+                          <p className="font-semibold text-gray-900">
+                            ${inv.totalAmount.toFixed(2)}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(inv.invoiceDate).toLocaleDateString()}
+                          </p>
+                        </div>
+
+                        {/* 4) Status Badge */}
+                        <div className="col-span-2 flex justify-center">
+                          {badge(inv)}
+                        </div>
+
+                        {/* 5) Actions */}
+                        <div className="col-span-4 flex items-center justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/upload-result?id=${inv.id}`)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Details
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => download(inv)}
+                            disabled={loading}
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            Download
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Expanded Line Items */}
+                    {expanded.has(inv.id) && (
+                      <div className="border-t border-gray-200 bg-gray-50 p-4">
+                        <h4 className="font-medium text-gray-800 mb-3">Line Items</h4>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-gray-200">
+                                <th className="py-2 text-gray-600 text-left">Description</th>
+                                <th className="py-2 text-gray-600 text-right">Qty</th>
+                                <th className="py-2 text-gray-600 text-right">Unit Price</th>
+                                <th className="py-2 text-gray-600 text-right">Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {inv.lineItems.map((item) => (
+                                <tr key={item.id} className="border-b border-gray-100">
+                                  <td className="py-2">{item.description}</td>
+                                  <td className="py-2 text-right">{item.quantity}</td>
+                                  <td className="py-2 text-right">${item.unitPrice.toFixed(2)}</td>
+                                  <td className="py-2 text-right font-medium">${item.amount.toFixed(2)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        {inv.matchedPO && (
+                          <div className="mt-3 text-sm text-gray-600">
+                            <span className="font-medium">Matched PO:</span> {inv.matchedPO}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+
+        {/* Summary */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
+            {/* Total Invoices */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 text-center">
+              <p className="text-2xl font-bold text-gray-900">{invoices.length}</p>
+              <p className="text-sm text-gray-600">Total Invoices</p>
+            </div>
+
+            {/* Matched */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 text-center">
+              <p className="text-2xl font-bold text-green-600">
+                {invoices.filter(inv => rawToGroup[inv.status] === "Matched").length}
+              </p>
+              <p className="text-sm text-gray-600">Matched</p>
+            </div>
+
+            {/* Discrepancy */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 text-center">
+              <p className="text-2xl font-bold text-yellow-600">
+                {invoices.filter(inv => rawToGroup[inv.status] === "Discrepancy").length}
+              </p>
+              <p className="text-sm text-gray-600">Discrepancies</p>
+            </div>
+
+            {/* Failed */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 text-center">
+              <p className="text-2xl font-bold text-red-600">
+                {invoices.filter(inv => rawToGroup[inv.status] === "Failed").length}
+              </p>
+              <p className="text-sm text-gray-600">Failed / Unmatched</p>
+            </div>
+
+            {/* Total Value */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 text-center">
+              <p className="text-2xl font-bold text-blue-600">
+                ${invoices.reduce((sum, inv) => sum + inv.totalAmount, 0).toFixed(2)}
+              </p>
+              <p className="text-sm text-gray-600">Total Value</p>
+            </div>
+          </div>
+      </div>
+    </div>
   );
-} 
+}
