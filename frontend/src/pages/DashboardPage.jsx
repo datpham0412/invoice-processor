@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { FileText, Upload, CheckCircle, BarChart3 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
+
 export default function MatchFlowDashboard() {
   const [poProgress, setPoProgress] = useState(65)
   const [uploadProgress, setUploadProgress] = useState(80)
@@ -21,6 +22,13 @@ export default function MatchFlowDashboard() {
     navigate('/upload-invoice')
   }
 
+  const handleViewInvoices = () => {
+    navigate('/invoices')
+  }
+
+  const handleViewPurchaseOrders = () => {
+    navigate('/purchase-orders')
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 lg:p-8">
@@ -266,7 +274,7 @@ export default function MatchFlowDashboard() {
               </div>
 
               {/* CTA Button */}
-              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] group-hover:shadow-md">
+              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] group-hover:shadow-md" onClick={handleViewInvoices}>
                 <FileText className="w-4 h-4 mr-2" />
                 View Invoices
               </Button>
@@ -311,7 +319,8 @@ export default function MatchFlowDashboard() {
               </div>
 
               {/* CTA Button */}
-              <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] group-hover:shadow-md">
+              <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] group-hover:shadow-md" 
+                onClick={handleViewPurchaseOrders}>
                 <BarChart3 className="w-4 h-4 mr-2" />
                 View Purchase Orders
               </Button>
