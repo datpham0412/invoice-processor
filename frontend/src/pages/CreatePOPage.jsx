@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Plus, Trash2, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "@/api/api";
 
 export default function CreatePOPage() {
@@ -15,9 +15,6 @@ export default function CreatePOPage() {
   const [lineItems, setLineItems] = useState([{ description: "", quantity: 1, unitPrice: 0 }]);
   const navigate = useNavigate()
 
-  const handleBack = () => {
-    navigate('/dashboard')
-  }
 
   const handleLineItemChange = (index, field, value) => {
     const newItems = [...lineItems];
@@ -87,13 +84,10 @@ export default function CreatePOPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Button
-            onClick={handleBack}
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4 transition-colors"
-          >
+          <Link to="/dashboard" className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
-          </Button>
+          </Link>
 
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl shadow-2xl border border-white/20 overflow-hidden backdrop-blur-sm">
             <div className="px-8 py-6 flex items-center space-x-4">
