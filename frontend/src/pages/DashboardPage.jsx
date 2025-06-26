@@ -17,6 +17,10 @@ export default function MatchFlowDashboard() {
     navigate('/create-po')
   }
 
+  const handleUploadInvoice = () => {
+    navigate('/upload-invoice')
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 lg:p-8">
@@ -147,7 +151,7 @@ export default function MatchFlowDashboard() {
               {/* CTA Button */}
               <Button
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] group-hover:shadow-md"
-                onClick={() => setUploadProgress(Math.min(100, uploadProgress + 5))}
+                onClick={handleUploadInvoice}
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Invoice
