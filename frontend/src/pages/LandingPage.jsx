@@ -26,6 +26,10 @@ export default function LandingPage() {
     setIsAuthenticated(!!token)
   }, [])
 
+  const redirectToDashboard = () => {
+    navigate('/dashboard')
+  }
+
   const handleLogin = () => {
     navigate('/auth')
   }
@@ -142,6 +146,7 @@ export default function LandingPage() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 text-lg font-medium transition-all duration-200 transform hover:scale-105"
+                onClick={redirectToDashboard}
               >
                 Get Started
                 <ArrowRight className="ml-2 w-5 h-5" />
