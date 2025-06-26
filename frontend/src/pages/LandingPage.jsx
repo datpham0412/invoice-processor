@@ -22,7 +22,7 @@ export default function LandingPage() {
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('accessToken')
     setIsAuthenticated(!!token)
   }, [])
 
