@@ -6,5 +6,7 @@ namespace InvoiceProcessor.API.Application.Models{
         public bool IsMatched { get; set; }
         public InvoiceStatus Status { get; set; }
         public string? FailureReason { get; set; }
+        public List<string> MatchedFields { get; set; } = new ();
+        public List<string> Discrepancies { get; set; } = new ();
     }
 }
