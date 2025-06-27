@@ -31,7 +31,8 @@ public class PurchaseOrdersController : ControllerBase
             po.IssueDate,
             po.LineItems.Select(li => new POLineItemListDto(
                 li.Id, li.Description, li.Quantity, li.UnitPrice, li.Amount))
-            .ToList());
+            .ToList(),
+            po.Status);
 
         return Ok(dto);
     }
