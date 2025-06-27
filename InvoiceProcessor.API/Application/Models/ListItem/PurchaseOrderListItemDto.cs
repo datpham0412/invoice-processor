@@ -1,3 +1,5 @@
+using InvoiceProcessor.API.Domain.Enums;
+
 namespace InvoiceProcessor.API.Application.Models.ListItem;
 
 public record PurchaseOrderListItemDto(
@@ -6,5 +8,6 @@ public record PurchaseOrderListItemDto(
     string   VendorName,
     decimal  TotalAmount,
     DateTime IssueDate,
-    IReadOnlyList<POLineItemListDto> LineItems
+    IReadOnlyList<POLineItemListDto> LineItems,
+    InvoiceStatus Status
     );
