@@ -62,7 +62,7 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence
                 .Include(po => po.LineItems)
                 .Where(po => po.UserId == userId)
                 .OrderByDescending(po => po.IssueDate)
-                .Select(po => new PurchaseOrderListItemDto(po.Id, po.PoNumber, po.VendorName, po.TotalAmount, po.IssueDate, po.LineItems.Select(li => new POLineItemListDto(li.Id, li.Description, li.Quantity, li.UnitPrice, li.Amount)).ToList()))
+                .Select(po => new PurchaseOrderListItemDto(po.Id, po.PoNumber, po.VendorName, po.TotalAmount, po.IssueDate, po.LineItems.Select(li => new POLineItemListDto(li.Id, li.Description, li.Quantity, li.UnitPrice, li.Amount)).ToList(), po.Status))
                 .ToListAsync();
         }
 
