@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using InvoiceProcessor.API.Domain.Enums;
+
 namespace InvoiceProcessor.API.Domain.Entities
 {
     public class PurchaseOrder
@@ -13,5 +15,6 @@ namespace InvoiceProcessor.API.Domain.Entities
         public decimal TotalAmount { get; set; }
         public string UserId { get; set; } = default!;
         public AppUser User { get; set; } = default!;
+        public InvoiceStatus Status { get; set; }
     }
 }
