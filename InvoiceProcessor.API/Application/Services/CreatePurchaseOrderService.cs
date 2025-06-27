@@ -1,6 +1,7 @@
 using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Application.Models.PurchaseOrders;
 using InvoiceProcessor.API.Domain.Entities;
+using InvoiceProcessor.API.Domain.Enums;
 
 namespace InvoiceProcessor.API.Application.Services
 {
@@ -26,7 +27,8 @@ namespace InvoiceProcessor.API.Application.Services
                 Quantity = li.Quantity,
                 UnitPrice = li.UnitPrice,
                 Amount = li.Amount
-            }).ToList()
+            }).ToList(),
+            Status = po.Status
         };
 
         public async Task<PurchaseOrderResponse?> GetByPoNumberAsync(string poNumber, string userId)
@@ -58,7 +60,8 @@ namespace InvoiceProcessor.API.Application.Services
                     Quantity = li.Quantity,
                     UnitPrice = li.UnitPrice
                 }).ToList(),
-                UserId = userId
+                UserId = userId,
+                Status = InvoiceStatus.Pending
             };
 
             await _purchaseOrderRepository.AddAsync(purchaseOrder);
