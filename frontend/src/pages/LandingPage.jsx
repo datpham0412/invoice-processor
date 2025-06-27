@@ -22,8 +22,8 @@ export default function LandingPage() {
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    setIsAuthenticated(!!token)
+    const accessToken = localStorage.getItem('accessToken')
+    setIsAuthenticated(!!accessToken)
   }, [])
 
   const redirectToDashboard = () => {

@@ -14,8 +14,8 @@ import { scheduleProactiveRefresh, logoutAndRedirect } from './utils/tokenServic
 
 // Wrapper for protecting routes
 const RequireAuth = ({ children }) => {
-  const token = localStorage.getItem('accessToken');
-  return token ? children : <Navigate to="/auth" replace />;
+  const accessToken = localStorage.getItem('accessToken');
+  return accessToken ? children : <Navigate to="/auth" replace />;
 };
 
 function App() {
