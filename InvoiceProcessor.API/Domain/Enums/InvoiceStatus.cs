@@ -4,10 +4,11 @@ namespace InvoiceProcessor.API.Domain.Enums
     {
         Pending = 0,
         Matched = 1,
-        Discrepancy = 2,
-        UnmatchedNoPO = 3,
-        MatchedByInvoiceNumber = 4,
-        FallbackVendorMismatch = 5,
-        FallbackInvoiceNotFound = 6
+        MatchedByInvoiceNumber = 2,
+        PartialMatch = 3,
+        Discrepancy = 4,
+        UnmatchedNoPO = 5,
+        FallbackVendorMismatch = 6,
+        FallbackInvoiceNotFound = 7
     }
 }
