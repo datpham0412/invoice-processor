@@ -20,7 +20,6 @@ namespace InvoiceProcessor.API.Controllers
         private readonly IBlobStorage _blobStorage;
         private readonly IInvoiceRepository _invoiceRepository;
         private readonly AppDbContext _ctx;
-
         public InvoiceUploadController(
             UploadInvoiceService uploadService,
             MatchingService matchingService,
@@ -34,7 +33,6 @@ namespace InvoiceProcessor.API.Controllers
             _invoiceRepository = invoiceRepository;
             _ctx = ctx;
         }
-
         /* -----------------------  UPLOAD  ----------------------- */
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
@@ -48,30 +46,23 @@ namespace InvoiceProcessor.API.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             await using var stream = file.OpenReadStream();
-
             try
             {
                 // Process upload only (no matching)
                 var invoice = await _uploadService.ProcessUploadAsync(stream, file.FileName, userId);
-
-                // Convert absolute blob path into relative download URL
-                var fileName = Path.GetFileName(invoice.BlobUrl);
-                var safeName = Uri.EscapeDataString(fileName);
-                invoice.BlobUrl = $"/api/invoices/file/{safeName}";
-                await _ctx.SaveChangesAsync();
-
-                var baseUrl = $"{Request.Scheme}://{Request.Host}";
-                var selfLink = $"{baseUrl}{invoice.BlobUrl}";
+                var safeName    = Uri.EscapeDataString(invoice.Filename);
+                var relativeUrl = $"/api/invoices/file/{safeName}";
+                var baseUrl     = $"{Request.Scheme}://{Request.Host}";
+                var selfLink    = $"{baseUrl}{relativeUrl}";
 
                 var response = new UploadInvoiceResponse
                 {
-                    InvoiceId = invoice.Id,
-                    Status = invoice.Status,
-                    BlobUrl = selfLink,
+                    InvoiceId     = invoice.Id,
+                    Status        = invoice.Status,
+                    BlobUrl       = selfLink,
                     FailureReason = null
                 };
-
-                return Ok(response);
+                                return Ok(response);
             }
             catch (DuplicateInvoiceException ex)
             {
@@ -90,7 +81,6 @@ namespace InvoiceProcessor.API.Controllers
         public async Task<IActionResult> Download(string fileName)
         {
             var decoded = Uri.UnescapeDataString(fileName);
-
             try
             {
                 var stream = await _blobStorage.DownloadAsync(decoded);
@@ -104,7 +94,6 @@ namespace InvoiceProcessor.API.Controllers
         }
     }
 }
-
 
 /// <summary>Shape returned to the front-end.</summary>
 public sealed class UploadInvoiceResponse
