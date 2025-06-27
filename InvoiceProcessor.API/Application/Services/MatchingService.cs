@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Application.Models;
 using InvoiceProcessor.API.Domain.Entities;
@@ -43,9 +44,17 @@ namespace InvoiceProcessor.API.Application.Services
             if (string.IsNullOrWhiteSpace(invoice.UserId))
                 throw new ArgumentException("Invoice must contain a valid UserId for matching.");
 
+            // Prepare result
+            var result = new MatchResult
+            {
+                MatchedFields = new List<string>(),
+                Discrepancies = new List<string>()
+            };
+
+            // If no PO number provided, fallback logic
             if (string.IsNullOrWhiteSpace(invoice.PoNumber))
             {
-                // Fallback by invoice number + vendor
+                // Try fallback by invoice number + vendor
                 var normalizedVendor = invoice.VendorName?.Trim().ToLowerInvariant();
                 var fallbackPo = await _poRepository.GetByPoAndVendorAsync(
                     invoice.InvoiceNumber,
@@ -55,18 +64,15 @@ namespace InvoiceProcessor.API.Application.Services
                 if (fallbackPo != null)
                 {
                     invoice.PoNumber = fallbackPo.PoNumber;
-                    return await HandleTotalsAsync(
-                        invoice,
-                        fallbackPo,
-                        InvoiceStatus.MatchedByInvoiceNumber);
+                    return await HandleTotalsAsync(invoice, fallbackPo, InvoiceStatus.MatchedByInvoiceNumber);
                 }
 
-                // Check mismatch vs no PO
+                // Try match by invoice number only
                 var maybePo = await _poRepository.GetByInvoiceNumberOnlyAsync(
                     invoice.InvoiceNumber,
                     invoice.UserId);
-                string reason;
 
+                string reason;
                 if (maybePo != null)
                 {
                     invoice.Status = InvoiceStatus.FallbackVendorMismatch;
@@ -78,37 +84,37 @@ namespace InvoiceProcessor.API.Application.Services
                     reason = "No matching PO found by invoice number";
                 }
 
+                // record discrepancy on PONumber field
+                result.Discrepancies.Add("PoNumber");
+
                 await LogExceptionAsync(invoice.Id, reason);
                 await _invoiceRepository.UpdateAsync(invoice);
                 await _invoiceRepository.SaveChangesAsync();
 
-                return new MatchResult
-                {
-                    IsMatched = false,
-                    Status = invoice.Status,
-                    FailureReason = reason
-                };
+                result.IsMatched = false;
+                result.Status = invoice.Status;
+                result.FailureReason = reason;
+                return result;
             }
 
+            // PO number provided: fetch PO
             var po = await _poRepository.GetByPoNumberAsync(invoice.PoNumber, invoice.UserId);
             if (po == null)
             {
                 var reason = $"No Purchase Order found with PoNumber = {invoice.PoNumber}";
-                await LogExceptionAsync(invoice.Id, reason);
-
+                result.Discrepancies.Add("PoNumber");
                 invoice.Status = InvoiceStatus.UnmatchedNoPO;
+                await LogExceptionAsync(invoice.Id, reason);
                 await _invoiceRepository.UpdateAsync(invoice);
                 await _invoiceRepository.SaveChangesAsync();
 
-                return new MatchResult
-                {
-                    IsMatched = false,
-                    Status = invoice.Status,
-                    FailureReason = reason
-                };
+                result.IsMatched = false;
+                result.Status = invoice.Status;
+                result.FailureReason = reason;
+                return result;
             }
 
-            // Final total check
+            // Final detailed match on fields
             return await HandleTotalsAsync(invoice, po, InvoiceStatus.Matched);
         }
 
@@ -118,37 +124,52 @@ namespace InvoiceProcessor.API.Application.Services
             InvoiceStatus successStatus,
             string? forcedReason = null)
         {
-            var poTotal = po.TotalAmount;
-            var invoiceTotal = invoice.TotalAmount;
-            var isMatch = poTotal == invoiceTotal && forcedReason == null;
+            var result = new MatchResult
+            {
+                MatchedFields = new List<string>(),
+                Discrepancies = new List<string>()
+            };
 
-            if (isMatch)
+            // Field-level comparisons
+            // InvoiceNumber
+            if (invoice.InvoiceNumber == po.PoNumber)
+                result.MatchedFields.Add("InvoiceNumber");
+            else
+                result.Discrepancies.Add("InvoiceNumber");
+
+            // VendorName
+            if (string.Equals(invoice.VendorName, po.VendorName, StringComparison.OrdinalIgnoreCase))
+                result.MatchedFields.Add("VendorName");
+            else
+                result.Discrepancies.Add("VendorName");
+
+            // TotalAmount
+            if (invoice.TotalAmount == po.TotalAmount && forcedReason == null)
+                result.MatchedFields.Add("TotalAmount");
+            else
+                result.Discrepancies.Add("TotalAmount");
+
+            // Determine final status
+            if (result.Discrepancies.Count == 0 && forcedReason == null)
             {
                 invoice.Status = successStatus;
+                result.IsMatched = true;
                 await LogExceptionAsync(invoice.Id, $"Invoice matched with PO {po.PoNumber}");
-                await _invoiceRepository.UpdateAsync(invoice);
-                await _invoiceRepository.SaveChangesAsync();
-
-                return new MatchResult
-                {
-                    IsMatched = true,
-                    Status = invoice.Status
-                };
+            }
+            else
+            {
+                var reason = forcedReason ?? $"Fields mismatched: {string.Join(", ", result.Discrepancies)}";
+                invoice.Status = InvoiceStatus.Discrepancy;
+                result.IsMatched = false;
+                result.FailureReason = reason;
+                await LogExceptionAsync(invoice.Id, reason);
             }
 
-            var reason = forcedReason ?? $"Total amount mismatch: PO={poTotal}, Invoice={invoiceTotal}";
-            await LogExceptionAsync(invoice.Id, reason);
-
-            invoice.Status = InvoiceStatus.Discrepancy;
+            // Persist changes
             await _invoiceRepository.UpdateAsync(invoice);
             await _invoiceRepository.SaveChangesAsync();
-
-            return new MatchResult
-            {
-                IsMatched = false,
-                Status = invoice.Status,
-                FailureReason = reason
-            };
+            result.Status = invoice.Status;
+            return result;
         }
     }
 }
