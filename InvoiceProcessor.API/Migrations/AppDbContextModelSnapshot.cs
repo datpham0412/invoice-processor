@@ -77,6 +77,19 @@ namespace InvoiceProcessor.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExtractionCompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExtractionStartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Filename")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("InvoiceDate")
                         .HasColumnType("datetime2");
 
