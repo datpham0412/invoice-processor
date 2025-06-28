@@ -23,22 +23,15 @@ import {
   ChevronRight,
   Filter,
 } from "lucide-react";
+import { INVOICE_STATUS, renderBadge } from "@/lib/invoiceStatusMap.jsx";
 
-const rawToGroup = {
-  Pending: "Pending",
-  Matched: "Matched",
-  MatchedByInvoiceNumber: "Matched",
-  Discrepancy: "Discrepancy",
-  FallbackVendorMismatch: "Discrepancy",
-  UnmatchedNoPO: "Failed",
-  FallbackInvoiceNotFound: "Failed",
-};
-
-const groupConfig = {
-  Pending: { color: "bg-gray-100 text-gray-800 border-gray-200" },
-  Matched: { color: "bg-green-100 text-green-800 border-green-200" },
-  Discrepancy: { color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-  Failed: { color: "bg-red-100 text-red-800 border-red-200" },
+// Helper function to get status group for filtering
+const getStatusGroup = (status) => {
+  const info = INVOICE_STATUS[status] || INVOICE_STATUS.default;
+  if (info.label === "Matched") return "Matched";
+  if (info.label === "Partial Match" || info.label === "Discrepancy") return "Discrepancy";
+  if (info.label === "Failed to Match") return "Failed";
+  return "Pending";
 };
 
 export default function InvoicesPage() {
@@ -67,7 +60,7 @@ export default function InvoicesPage() {
       inv.vendorName.toLowerCase().includes(searchTerm.toLowerCase())
     );
     if (selected !== "All Status") {
-      arr = arr.filter(inv => rawToGroup[inv.status] === selected);
+      arr = arr.filter(inv => getStatusGroup(inv.status) === selected);
     }
     setFiltered(arr);
   }, [searchTerm, selected, invoices]);
@@ -95,16 +88,6 @@ export default function InvoicesPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const badge = inv => {
-    const grp = rawToGroup[inv.status] || "Pending";
-    const cfg = groupConfig[grp];
-    return <Badge
-    className={`${groupConfig[ rawToGroup[inv.status] ].color} border font-medium text-xs rounded-full px-2 py-1 flex-shrink-0`}
-  >
-    { rawToGroup[inv.status] }
-  </Badge>;
   };
 
   return (
@@ -226,19 +209,17 @@ export default function InvoicesPage() {
 
                         {/* 4) Status Badge */}
                         <div className="col-span-2 flex justify-center">
-                          {badge(inv)}
+                          {renderBadge(inv.status)}
                         </div>
 
                         {/* 5) Actions */}
                         <div className="col-span-4 flex items-center justify-end space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate(`/upload-result?id=${inv.id}`)}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Details
-                          </Button>
+                        <Link to={`/upload-result?id=${inv.id}`}>
+                            <Button variant="outline" size="sm">
+                              <Eye className="w-4 h-4 mr-1" />
+                              Details
+                            </Button>
+                          </Link>
                           <Button
                             variant="outline"
                             size="sm"
@@ -304,7 +285,7 @@ export default function InvoicesPage() {
             {/* Matched */}
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 text-center">
               <p className="text-2xl font-bold text-green-600">
-                {invoices.filter(inv => rawToGroup[inv.status] === "Matched").length}
+                {invoices.filter(inv => getStatusGroup(inv.status) === "Matched").length}
               </p>
               <p className="text-sm text-gray-600">Matched</p>
             </div>
@@ -312,7 +293,7 @@ export default function InvoicesPage() {
             {/* Discrepancy */}
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 text-center">
               <p className="text-2xl font-bold text-yellow-600">
-                {invoices.filter(inv => rawToGroup[inv.status] === "Discrepancy").length}
+                {invoices.filter(inv => getStatusGroup(inv.status) === "Discrepancy").length}
               </p>
               <p className="text-sm text-gray-600">Discrepancies</p>
             </div>
@@ -320,7 +301,7 @@ export default function InvoicesPage() {
             {/* Failed */}
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 text-center">
               <p className="text-2xl font-bold text-red-600">
-                {invoices.filter(inv => rawToGroup[inv.status] === "Failed").length}
+                {invoices.filter(inv => getStatusGroup(inv.status) === "Failed").length}
               </p>
               <p className="text-sm text-gray-600">Failed / Unmatched</p>
             </div>
