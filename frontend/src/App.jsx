@@ -11,6 +11,8 @@ import DashboardPage from './pages/DashboardPage';
 import { Toaster } from './components/ui/sonner';
 import api from './api/api';
 import { scheduleProactiveRefresh, logoutAndRedirect } from './utils/tokenService';
+import AutoMatchPage from './pages/AutoMatchPage';
+import UploadResultPage from './pages/UploadResultPage';
 
 // Wrapper for protecting routes
 const RequireAuth = ({ children }) => {
@@ -111,7 +113,22 @@ function App() {
             </RequireAuth>
           }
         />
-
+        <Route
+          path="/auto-match"
+          element={
+            <RequireAuth>
+              <AutoMatchPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/upload-result"
+          element={
+            <RequireAuth>
+              <UploadResultPage />
+            </RequireAuth>
+          }
+        />
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
