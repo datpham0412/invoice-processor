@@ -33,6 +33,7 @@ export default function UploadResultPage() {
   const [invoice, setInvoice] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showPdf, setShowPdf] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState(null)
   const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
@@ -46,6 +47,28 @@ export default function UploadResultPage() {
       .catch(() => navigate("/dashboard"))
       .finally(() => setLoading(false))
   }, [invoiceId, navigate])
+
+  useEffect(() => {
+    if (!showPdf) {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+        setPdfUrl(null)
+      }
+      return
+    }
+
+    let canceled = false
+    api.get(invoice.blobUrl, { responseType: "blob" })
+      .then(res => {
+        if (canceled) return
+        setPdfUrl(URL.createObjectURL(res.data))
+      })
+      .catch(err => console.error("PDF preview load failed:", err))
+
+    return () => {
+      canceled = true
+    }
+  }, [showPdf, invoice?.blobUrl])
 
   const handleDownload = async () => {
     setDownloading(true)
@@ -330,13 +353,17 @@ export default function UploadResultPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="bg-gray-100 rounded-lg p-4 text-center">
-                <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">PDF preview would be displayed here</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  In a real implementation, this would show the actual PDF content
+              {pdfUrl ? (
+                <iframe
+                  src={pdfUrl}
+                  className="w-full h-[600px] border"
+                  title="PDF Preview"
+                />
+              ) : (
+                <p className="text-center text-gray-500 py-12">
+                  Loading PDF…
                 </p>
-              </div>
+              )}
             </CardContent>
           </Card>
         )}
