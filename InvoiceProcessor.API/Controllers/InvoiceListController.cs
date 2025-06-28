@@ -101,6 +101,10 @@ public class InvoicesController : ControllerBase
 
         var fullBlobUrl = ToFullUrl(inv.BlobUrl);
 
+        var clientBlobPath = fullBlobUrl.StartsWith("/api", StringComparison.OrdinalIgnoreCase)
+            ? fullBlobUrl.Substring(4)
+            : fullBlobUrl;
+
         var dto = new InvoiceDetailDto(
             inv.Id,
             inv.InvoiceNumber,
@@ -120,7 +124,7 @@ public class InvoicesController : ControllerBase
 
             procTime,
 
-            fullBlobUrl,
+            clientBlobPath,
             inv.Filename,
             inv.CreatedAt,
             inv.LineItems.Select(li => new LineItemListDto(
