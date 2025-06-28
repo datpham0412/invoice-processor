@@ -80,11 +80,20 @@ namespace InvoiceProcessor.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DiscrepanciesJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExceptionRecordsJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("ExtractionCompletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("ExtractionStartedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FailureReason")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Filename")
                         .IsRequired()
@@ -97,6 +106,18 @@ namespace InvoiceProcessor.API.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool?>("IsMatched")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MatchConfidence")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MatchType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MatchedFieldsJson")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PoNumber")
                         .HasMaxLength(50)
