@@ -30,6 +30,10 @@ export default function MatchFlowDashboard() {
     navigate('/purchase-orders')
   }
 
+  const handleStartAutoMatch = () => {
+    navigate('/auto-match')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 lg:p-8">
       {/* Floating Elements */}
@@ -225,7 +229,7 @@ export default function MatchFlowDashboard() {
               {/* CTA Button */}
               <Button
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] group-hover:shadow-md"
-                onClick={() => setMatchProgress(100)}
+                onClick={handleStartAutoMatch}
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Start Auto-Match
