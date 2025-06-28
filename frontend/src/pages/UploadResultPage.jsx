@@ -21,6 +21,8 @@ import {
   Eye,
   Upload,
   BarChart3,
+  XCircle,
+  AlertTriangle,
 } from "lucide-react"
 import { INVOICE_STATUS, renderBadge } from "@/lib/invoiceStatusMap.jsx"
 
@@ -145,11 +147,11 @@ export default function UploadResultPage() {
             {/* Processing Summary */}
             <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 text-2xl font-bold">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <span>Processing Summary</span>
                 </CardTitle>
-                <CardDescription>Overview of the invoice processing results</CardDescription>
+                <CardDescription className="text-gray-600">Overview of the invoice processing results</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -184,8 +186,11 @@ export default function UploadResultPage() {
             {/* Extracted Data */}
             <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle>Extracted Invoice Data</CardTitle>
-                <CardDescription>Information automatically extracted from your invoice</CardDescription>
+                <CardTitle className="flex items-center space-x-2 text-2xl font-bold">
+                  <FileText className="w-5 h-5 text-green-600" />
+                  <span>Extracted Invoice Data</span>
+                </CardTitle>
+                <CardDescription className="text-gray-600">Information automatically extracted from your invoice</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Vendor */}
@@ -252,37 +257,109 @@ export default function UploadResultPage() {
             </Card>
 
             {/* Matching Results */}
-            {invoice.matchingDetails && (
+            {invoice.matchType && (
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  <CardTitle className="flex items-center space-x-2 text-2xl font-bold">
+                    {/* pick correct icon & color from the status map */}
+                    {(() => {
+                      const { icon: StatusIcon, color } = INVOICE_STATUS[invoice.status] || INVOICE_STATUS.default;
+                      return <StatusIcon className={`w-5 h-5 text-${color}-600`} />;
+                    })()}
                     <span>Purchase Order Matching</span>
                   </CardTitle>
-                  <CardDescription>Results of automatic PO matching</CardDescription>
+                  <CardDescription className="text-gray-600">Results of automatic PO matching</CardDescription>
                 </CardHeader>
+
                 <CardContent className="space-y-4">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-green-800">
-                        {invoice.status.startsWith("Matched") ? "Successfully Matched" : "Discrepancy Found"}
-                      </h4>
-                      <Badge className="bg-green-100 text-green-800 border-green-200">
-                        {invoice.matchingDetails.matchType}
-                      </Badge>
+                  {invoice.isMatched ? (
+                    // ─── Full Match ─────────────────────────────────────────────────────
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-green-800">Successfully Matched</h4>
+                        <Badge className="bg-green-100 text-green-800 border-green-200">
+                          {invoice.matchType}
+                        </Badge>
+                      </div>
+                      <p className="text-green-700 mb-3">
+                        Invoice matched with Purchase Order:&nbsp;
+                        <strong>{invoice.poNumber}</strong>
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {invoice.matchedFields.map((f) => (
+                          <div key={f} className="flex items-center space-x-1">
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                            <span className="text-sm text-green-700">{f}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-green-700 mb-3">
-                      Invoice matched to PO: <strong>{invoice.matchingDetails.poNumber}</strong>
-                    </p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {invoice.matchingDetails.matchedFields.map((f) => (
-                        <div key={f} className="flex items-center space-x-1">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-sm text-green-700">{f}</span>
+                  ) : invoice.poNumber == null ? (
+                    // ─── No PO Found (Failed to Match) ────────────────────────────────
+                    <div
+                      className="rounded-lg p-4"
+                      style={{ backgroundColor: "rgba(254, 202, 202, 0.5)", border: "1px solid #f87171" }} // bg-red-50, border-red-200
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-red-800">Failed to Match</h4>
+                        {renderBadge(invoice.status)}
+                      </div>
+                      {invoice.failureReason && (
+                        <p className="text-red-700 mb-3">{invoice.failureReason}</p>
+                      )}
+                      {invoice.discrepancies && invoice.discrepancies.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {invoice.discrepancies.map((field) => (
+                            <div key={field} className="flex items-center space-x-1">
+                              <XCircle className="w-4 h-4 text-red-600" />
+                              <span className="text-sm text-red-700">{field}</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
-                  </div>
+                  ) : (
+                    // ─── Partial Mismatch (yellow) ────────────────────────────────────
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-yellow-800">Discrepancy Found</h4>
+                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                          {invoice.matchType}
+                        </Badge>
+                      </div>
+                      {/* Failure reason FIRST */}
+                      {invoice.failureReason && (
+                        <p className="text-yellow-700 mt-3">{invoice.failureReason}</p>
+                      )}
+                      {/* Grid of matched and mismatched fields */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                        {[
+                          ...(invoice.matchedFields || []).map((f) => ({
+                            type: "matched",
+                            field: f,
+                          })),
+                          ...(invoice.discrepancies || []).map((f) => ({
+                            type: "mismatched",
+                            field: f,
+                          })),
+                        ].map(({ type, field }) => (
+                          <div key={field} className="flex items-center space-x-1">
+                            {type === "matched" ? (
+                              <>
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                <span className="text-sm text-green-700">{field}</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                                <span className="text-sm text-yellow-700">{field}</span>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
