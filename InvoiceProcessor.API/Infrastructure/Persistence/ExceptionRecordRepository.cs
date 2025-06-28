@@ -22,6 +22,12 @@ namespace InvoiceProcessor.API.Infrastructure.Persistence{
                                  .ToListAsync();
         }
 
+        public async Task<List<ExceptionRecord>> GetByInvoiceIdAsync(Guid invoiceId){
+            return await _context.ExceptionRecords!
+                                 .Where(er => er.InvoiceId == invoiceId)
+                                 .ToListAsync();
+        }
+
         public async Task SaveChangesAsync(){
             await _context.SaveChangesAsync();
         }
