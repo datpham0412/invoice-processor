@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text.Json;
 using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Application.Models;
 using InvoiceProcessor.API.Domain.Entities;
@@ -93,6 +94,22 @@ namespace InvoiceProcessor.API.Application.Services
                     result.Discrepancies.Add("PoNumber");
                 }
 
+                // after you set invoice.Status and log exceptions...
+                // ▶ copy primitives back onto the entity
+                invoice.IsMatched       = false;
+                invoice.MatchConfidence = result.MatchedFields.Count + result.Discrepancies.Count > 0
+                                        ? (int?) Math.Floor((double) result.MatchedFields.Count
+                                            / (result.MatchedFields.Count + result.Discrepancies.Count) * 100)
+                                        : 0;
+                invoice.MatchType       = "No Match";
+                invoice.FailureReason   = reason;
+
+                // Serialize match result into the invoice
+                invoice.MatchedFieldsJson    = JsonSerializer.Serialize(result.MatchedFields);
+                invoice.DiscrepanciesJson    = JsonSerializer.Serialize(result.Discrepancies);
+                invoice.ExceptionRecordsJson = JsonSerializer.Serialize(
+                    await _exceptionRecordRepository.GetByInvoiceIdAsync(invoice.Id)
+                );
                 await LogExceptionAsync(invoice.Id, reason);
                 await _invoiceRepository.UpdateAsync(invoice);
                 await _invoiceRepository.SaveChangesAsync();
@@ -110,6 +127,18 @@ namespace InvoiceProcessor.API.Application.Services
                 result.Discrepancies.Add("PoNumber");
                 invoice.Status = InvoiceStatus.UnmatchedNoPO;
                 await LogExceptionAsync(invoice.Id, reason);
+                
+                invoice.IsMatched       = false;
+                invoice.MatchConfidence = 0;
+                invoice.MatchType       = "No Match";
+                invoice.FailureReason   = reason;
+
+                // Serialize match result into the invoice
+                invoice.MatchedFieldsJson    = JsonSerializer.Serialize(result.MatchedFields);
+                invoice.DiscrepanciesJson    = JsonSerializer.Serialize(result.Discrepancies);
+                invoice.ExceptionRecordsJson = JsonSerializer.Serialize(
+                    await _exceptionRecordRepository.GetByInvoiceIdAsync(invoice.Id)
+                );
                 await _invoiceRepository.UpdateAsync(invoice);
                 await _invoiceRepository.SaveChangesAsync();
 
@@ -172,12 +201,31 @@ namespace InvoiceProcessor.API.Application.Services
                 await LogExceptionAsync(invoice.Id, result.FailureReason);
             }
 
+            // ▶ propagate back onto invoice
+            invoice.IsMatched       = result.IsMatched;
+            invoice.MatchConfidence = result.MatchedFields.Count + result.Discrepancies.Count > 0
+                                    ? (int?) Math.Floor((double) result.MatchedFields.Count
+                                        / (result.MatchedFields.Count + result.Discrepancies.Count) * 100)
+                                    : 0;
+            invoice.MatchType       = result.IsMatched ? "Full Match" : "Partial Match";
+            invoice.FailureReason   = result.FailureReason;
+
             await _invoiceRepository.UpdateAsync(invoice);
             await _invoiceRepository.SaveChangesAsync();
             result.Status = invoice.Status;
             po.Status = invoice.Status;
             await _poRepository.UpdateAsync(po);
             await _poRepository.SaveChangesAsync();
+
+            // Serialize into invoice
+            invoice.MatchedFieldsJson    = JsonSerializer.Serialize(result.MatchedFields);
+            invoice.DiscrepanciesJson    = JsonSerializer.Serialize(result.Discrepancies);
+            invoice.ExceptionRecordsJson = JsonSerializer.Serialize(
+                await _exceptionRecordRepository.GetByInvoiceIdAsync(invoice.Id)
+            );
+            await _invoiceRepository.UpdateAsync(invoice);
+            await _invoiceRepository.SaveChangesAsync();
+
             return result;
         }
     }
