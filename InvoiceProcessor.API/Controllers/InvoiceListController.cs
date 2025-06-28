@@ -1,6 +1,7 @@
 using InvoiceProcessor.API.Application.Interfaces;
 using InvoiceProcessor.API.Application.Models;
 using InvoiceProcessor.API.Application.Models.ListItem;
+using InvoiceProcessor.API.Application.Models.Detail;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -70,32 +71,62 @@ public class InvoicesController : ControllerBase
     public async Task<IEnumerable<InvoiceListItemDto>> List()
     {
         var list = await _repo.GetAllByUserAsync(CurrentUser);
-        return list.Select(inv => inv with
+        return list.Select(inv =>
         {
-            BlobUrl = ToFullUrl(inv.BlobUrl)
+            var full = ToFullUrl(inv.BlobUrl);
+            var clientPath = full.StartsWith("/api")
+                ? full.Substring(4)
+                : full;
+
+            return inv with
+            {
+                BlobUrl = clientPath
+            };
         });
     }
 
     // GET /api/invoices/{id}
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<InvoiceListItemDto>> Detail(Guid id)
+    public async Task<ActionResult<InvoiceDetailDto>> Detail(Guid id)
     {
         var inv = await _repo.GetByIdAsync(id, CurrentUser);
         if (inv is null) return NotFound();
 
+        string? procTime = null;
+        if (inv.ExtractionStartedAt.HasValue && inv.ExtractionCompletedAt.HasValue)
+        {
+            var span = inv.ExtractionCompletedAt.Value - inv.ExtractionStartedAt.Value;
+            procTime = $"{span.TotalSeconds:F1}s";
+        }
+
         var fullBlobUrl = ToFullUrl(inv.BlobUrl);
 
-        var dto = new InvoiceListItemDto(
+        var dto = new InvoiceDetailDto(
             inv.Id,
             inv.InvoiceNumber,
+            inv.PoNumber,
             inv.VendorName,
             inv.TotalAmount,
             inv.InvoiceDate,
             inv.Status,
+
+            inv.IsMatched,
+            inv.MatchConfidence,
+            inv.MatchType,
+            inv.FailureReason,
+            inv.MatchedFields,
+            inv.Discrepancies,
+            inv.ExceptionRecordsList,
+
+            procTime,
+
+            fullBlobUrl,
+            inv.Filename,
+            inv.CreatedAt,
             inv.LineItems.Select(li => new LineItemListDto(
                 li.Id, li.Description, li.Quantity, li.UnitPrice, li.Amount))
-            .ToList(),
-            fullBlobUrl);
+                .ToList()
+        );
 
         return Ok(dto);
     }
