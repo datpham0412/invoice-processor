@@ -16,5 +16,6 @@ namespace InvoiceProcessor.API.Domain.Entities
         public string UserId { get; set; } = default!;
         public AppUser User { get; set; } = default!;
         public InvoiceStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }
