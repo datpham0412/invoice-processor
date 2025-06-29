@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import CreatePOPage from './pages/CreatePOPage';
 import UploadInvoicePage from './pages/UploadInvoicePage';
-import ResultPage from './pages/ResultPage';
 import InvoicesPage from './pages/InvoicesPage';
 import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
 import AuthPage from './pages/AuthPage';
@@ -13,6 +12,7 @@ import api from './api/api';
 import { scheduleProactiveRefresh, logoutAndRedirect } from './utils/tokenService';
 import AutoMatchPage from './pages/AutoMatchPage';
 import UploadResultPage from './pages/UploadResultPage';
+import PurchaseOrderDetailsPage from './pages/PurchaseOrderDetailsPage';
 
 // Wrapper for protecting routes
 const RequireAuth = ({ children }) => {
@@ -90,14 +90,6 @@ function App() {
           }
         />
         <Route
-          path="/result"
-          element={
-            <RequireAuth>
-              <ResultPage />
-            </RequireAuth>
-          }
-        />
-        <Route
           path="/invoices"
           element={
             <RequireAuth>
@@ -126,6 +118,14 @@ function App() {
           element={
             <RequireAuth>
               <UploadResultPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/purchase-orders/:poId"
+          element={
+            <RequireAuth>
+              <PurchaseOrderDetailsPage />
             </RequireAuth>
           }
         />
