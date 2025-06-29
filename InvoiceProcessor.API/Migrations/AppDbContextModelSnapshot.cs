@@ -210,6 +210,9 @@ namespace InvoiceProcessor.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("IssueDate")
                         .HasColumnType("datetime2");
 
