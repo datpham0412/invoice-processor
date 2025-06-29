@@ -28,7 +28,8 @@ namespace InvoiceProcessor.API.Application.Services
                 UnitPrice = li.UnitPrice,
                 Amount = li.Amount
             }).ToList(),
-            Status = po.Status
+            Status = po.Status,
+            CreatedAt = po.CreatedAt
         };
 
         public async Task<PurchaseOrderResponse?> GetByPoNumberAsync(string poNumber, string userId)
@@ -61,7 +62,8 @@ namespace InvoiceProcessor.API.Application.Services
                     UnitPrice = li.UnitPrice
                 }).ToList(),
                 UserId = userId,
-                Status = InvoiceStatus.Pending
+                Status = InvoiceStatus.Pending,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _purchaseOrderRepository.AddAsync(purchaseOrder);
