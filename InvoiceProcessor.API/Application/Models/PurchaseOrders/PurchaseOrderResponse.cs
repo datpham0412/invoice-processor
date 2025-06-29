@@ -11,6 +11,7 @@ namespace InvoiceProcessor.API.Application.Models.PurchaseOrders{
         public List<PurchaseOrderLineItemResponse> LineItems { get; set; } = new();
         public decimal TotalAmount { get; set; }
         public InvoiceStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
     public class PurchaseOrderLineItemResponse{
         public string Description { get; set; } = string.Empty;
