@@ -73,5 +73,18 @@ namespace InvoiceProcessor.API.Infrastructure.Repositories{
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<IReadOnlyList<Invoice>> GetMatchedByPoAsync(string poNumber, string userId)
+        {
+            return await _context.Invoices!
+        .Include(i => i.LineItems)
+        .Where(i => 
+            i.UserId   == userId &&
+            i.PoNumber == poNumber &&
+            i.IsMatched == true
+        )
+        .OrderByDescending(i => i.InvoiceDate)
+        .ToListAsync();
+        }
     }
 }
