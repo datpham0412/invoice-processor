@@ -10,6 +10,8 @@ public interface IInvoiceRepository
     Task UpdateAsync(Invoice invoice);
     Task DeleteAsync(Guid id, string userId);
     Task SaveChangesAsync();
+    Task<IReadOnlyList<Invoice>> GetMatchedByPoAsync(string poNumber, string userId);
+
 }
 // This interface defines the contract for a repository that manages Invoice entities.
 // It includes methods for retrieving, adding, updating, and deleting invoices,
