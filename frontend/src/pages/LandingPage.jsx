@@ -133,7 +133,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Thanh dep trai
+              Smart, Simple Invoicing
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 leading-[1.15] pb-1">
                 Done Right
               </span>
