@@ -134,8 +134,11 @@ export default function UploadResultPage() {
                   </p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right flex flex-col items-end">
                 {renderBadge(invoice.status)}
+                {invoice.matchConfidence && (
+                  <span className="text-white/80 text-sm mt-1">{invoice.matchConfidence}% confidence</span>
+                )}
               </div>
             </div>
           </div>
