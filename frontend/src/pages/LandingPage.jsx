@@ -4,7 +4,20 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, BarChart3, Upload, FolderOpen, ArrowRight, Menu, X, Star, Zap, Target, Users } from "lucide-react"
+import {
+  FileText,
+  BarChart3,
+  Upload,
+  FolderOpen,
+  ArrowRight,
+  Menu,
+  X,
+  Star,
+  Zap,
+  Target,
+  Users,
+  CheckCircle,
+} from "lucide-react"
 import LogOutButton from "@/components/ui/logOutButton"
 
 export default function LandingPage() {
@@ -22,20 +35,20 @@ export default function LandingPage() {
   }, [])
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken')
+    const accessToken = localStorage.getItem("accessToken")
     setIsAuthenticated(!!accessToken)
   }, [])
 
   const redirectToDashboard = () => {
-    navigate('/dashboard')
+    navigate("/dashboard")
   }
 
   const handleLogin = () => {
-    navigate('/auth')
+    navigate("/auth")
   }
 
   const handleSignup = () => {
-    navigate('/auth')
+    navigate("/auth")
   }
 
   return (
@@ -72,10 +85,17 @@ export default function LandingPage() {
               </a>
               {!isAuthenticated ? (
                 <>
-                  <Button variant="ghost" className="text-base font-medium text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={handleLogin}>
+                  <Button
+                    variant="ghost"
+                    className="text-base font-medium text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                    onClick={handleLogin}
+                  >
                     Login
                   </Button>
-                  <Button className="text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleSignup}>
+                  <Button
+                    className="text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                    onClick={handleSignup}
+                  >
                     Sign Up
                   </Button>
                 </>
@@ -112,12 +132,19 @@ export default function LandingPage() {
                       <Button variant="ghost" className="w-full justify-start text-gray-700" onClick={handleLogin}>
                         Login
                       </Button>
-                      <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={handleSignup}>
+                      <Button
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                        onClick={handleSignup}
+                      >
                         Sign Up
                       </Button>
                     </>
                   ) : (
-                    <Button variant="ghost" className="w-full justify-start text-gray-700" onClick={handleLogout}>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-gray-700"
+                      onClick={() => setIsAuthenticated(false)}
+                    >
                       Log Out
                     </Button>
                   )}
@@ -139,9 +166,10 @@ export default function LandingPage() {
               </span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Create purchase orders, uploadd invoices, and automate matching with real-time insights. Transform your
+              Create purchase orders, upload invoices, and automate matching with real-time insights. Transform your
               finance operations with intelligent document processing.
             </p>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 size="lg"
@@ -154,7 +182,7 @@ export default function LandingPage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="px-8 py-4 text-lg font-medium border-gray-300 hover:bg-gray-50"
+                className="px-8 py-4 text-lg font-medium border-gray-300 hover:bg-gray-50 bg-transparent"
               >
                 Watch Demo
               </Button>
@@ -177,7 +205,7 @@ export default function LandingPage() {
                     <div className="w-3 h-3 bg-white/30 rounded-full"></div>
                   </div>
                 </div>
-                
+
                 <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Step 1: Create PO */}
                   <div className="space-y-4">
@@ -226,7 +254,7 @@ export default function LandingPage() {
 
                   {/* Arrow */}
                   <div className="hidden md:flex items-center justify-center md:col-start-2">
-                    <ArrowRight className="w-8 h-8 text-blue-300 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    <ArrowRight className="w-8 h-8 text-blue-300 animate-pulse" style={{ animationDelay: "0.5s" }} />
                   </div>
 
                   {/* Step 3: Auto Match */}
@@ -260,7 +288,10 @@ export default function LandingPage() {
 
               {/* Floating Elements for Visual Interest */}
               <div className="absolute -top-4 -left-4 w-20 h-20 bg-blue-200/30 rounded-full blur-xl animate-pulse"></div>
-              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-indigo-200/30 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+              <div
+                className="absolute -bottom-4 -right-4 w-32 h-32 bg-indigo-200/30 rounded-full blur-xl animate-pulse"
+                style={{ animationDelay: "1s" }}
+              ></div>
             </div>
 
             {/* Hero Stats */}
@@ -302,12 +333,11 @@ export default function LandingPage() {
               Streamline your entire invoice workflow with our comprehensive suite of tools
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Create PO */}
-            <Card 
+            <Card
               className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white/80 backdrop-blur-sm border-0 cursor-pointer"
-              onClick={() => navigate('/create-po')}
+              onClick={() => navigate("/create-po")}
             >
               <CardHeader className="text-center pb-4">
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -323,9 +353,9 @@ export default function LandingPage() {
             </Card>
 
             {/* Upload Invoice */}
-            <Card 
+            <Card
               className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white/80 backdrop-blur-sm border-0 cursor-pointer"
-              onClick={() => navigate('/upload-invoice')}
+              onClick={() => navigate("/upload-invoice")}
             >
               <CardHeader className="text-center pb-4">
                 <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -341,9 +371,9 @@ export default function LandingPage() {
             </Card>
 
             {/* Track Invoices */}
-            <Card 
+            <Card
               className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white/80 backdrop-blur-sm border-0 cursor-pointer"
-              onClick={() => navigate('/invoices')}
+              onClick={() => navigate("/invoices")}
             >
               <CardHeader className="text-center pb-4">
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -359,9 +389,9 @@ export default function LandingPage() {
             </Card>
 
             {/* Manage POs */}
-            <Card 
+            <Card
               className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white/80 backdrop-blur-sm border-0 cursor-pointer"
-              onClick={() => navigate('/purchase-orders')}
+              onClick={() => navigate("/purchase-orders")}
             >
               <CardHeader className="text-center pb-4">
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -501,7 +531,7 @@ export default function LandingPage() {
                 </blockquote>
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-semibold text-sm">MR</span>
+                    <span className="text-xs text-white font-semibold">MR</span>
                   </div>
                   <div>
                     <cite className="font-semibold text-gray-900 not-italic">Michael Rodriguez</cite>
@@ -514,35 +544,103 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to Transform Your Invoice Processing?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join hundreds of companies already using MatchFlow to streamline their finance operations.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button
-              size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-4 text-lg font-medium transition-all duration-200 transform hover:scale-105"
-              onClick={() => navigate('/auth')}
-            >
-              Start Free Trial
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white hover:bg-white/10 px-8 py-4 text-lg font-medium text-slate-500 bg-white"
-              onClick={() => navigate('/create-po')}
-            >
-              Schedule Demo
-            </Button>
+      {/* Enhanced Footer Section with Benefits */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center space-y-6">
+            {/* Main Message */}
+            <div className="space-y-2">
+              <h3 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Streamline Your Invoice Processing
+              </h3>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Experience the power of automated invoice matching. Our AI-powered system reduces processing time by 90%
+                and eliminates manual errors, giving you more time to focus on what matters most.
+              </p>
+            </div>
+
+            {/* Feature Highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-800">99.9% Accuracy</h4>
+                <p className="text-gray-600 text-center max-w-sm">
+                  Advanced AI ensures precise matching every time, reducing errors and improving compliance
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center">
+                  <Zap className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-800">Lightning Fast</h4>
+                <p className="text-gray-600 text-center max-w-sm">
+                  Process hundreds of invoices in seconds, not hours. Dramatically reduce your processing time
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <BarChart3 className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-800">Smart Analytics</h4>
+                <p className="text-gray-600 text-center max-w-sm">
+                  Gain insights into your procurement patterns and optimize your financial workflows
+                </p>
+              </div>
+            </div>
+
+            {/* Call to Action */}
+            <div className="mt-12 pt-8 border-t border-white/20">
+              <p className="text-lg text-gray-600 mb-6">Ready to transform your invoice processing workflow?</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 text-lg font-medium"
+                  onClick={() => navigate("/upload-invoice")}
+                >
+                  <Upload className="w-5 h-5 mr-2" />
+                  Upload Your First Invoice
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-blue-200 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg font-medium bg-transparent"
+                  onClick={() => navigate("/create-po")}
+                >
+                  <FileText className="w-5 h-5 mr-2" />
+                  Create Purchase Order
+                </Button>
+              </div>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="mt-8 pt-6 border-t border-white/10">
+              <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <span>Enterprise Security</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                  <span>24/7 Support</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
+                  <span>SOC 2 Compliant</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-indigo-400 rounded-full"></div>
+                  <span>99.9% Uptime</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
