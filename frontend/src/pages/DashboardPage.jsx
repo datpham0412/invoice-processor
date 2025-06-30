@@ -336,45 +336,6 @@ export default function MatchFlowDashboard() {
             </Card>
           </div>
         </div>
-
-        {/* Summary Stats */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">26</p>
-                <p className="text-sm text-gray-600">Purchase Orders</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <Upload className="w-5 h-5 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">20</p>
-                <p className="text-sm text-gray-600">Invoices Uploaded</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">18</p>
-                <p className="text-sm text-gray-600">Successful Matches</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
