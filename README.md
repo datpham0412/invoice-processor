@@ -80,26 +80,163 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
   Search, filter and export full audit logs, match-rate charts and spend summaries.  
   **Why It Matters:** Provides complete visibility into your payables pipeline—perfect for month-end close.
 
+
 <a id="tech-stack"></a>
 ## 🛠️ Tech Stack
 
-- 🖥️ **Backend:** ASP NET Core 6.0 (C# 10), Entity Framework Core 6  
-- 🗄️ **Database:** SQL Server (Azure SQL)  
-- ⚛️ **Frontend:** React 19.1.0 + Vite, @vitejs/plugin-react 4.4.1  
-- 🖌️ **UI / Styling:** Tailwind CSS, shadcn/ui, Lucide React icons  
-- ☁️ **Cloud Services:**  
-  - Azure Blob Storage (invoice PDFs)  
-  - Azure Cognitive Services (Form Recognizer)  
-  - Azure Service Bus (exception queue)  
-- 🐳 **Containerization:** Docker → Fly.io  
-- 📡 **Web Server / Proxy:** Nginx  
-- 🔒 **Authentication:** JWT Bearer tokens  
-- 📦 **Package Management:** npm (frontend), NuGet (backend)  
-- 📑 **API Documentation:** Swagger / OpenAPI spec, Postman Collection  
-- 🛠️ **Local Dev & Scripts:** Docker Compose for local end-to-end  
-- 🧪 **Testing:** xUnit (backend)
-- 🔄 **CI/CD:** GitHub Actions → Fly.io  
-- 📈 **Monitoring:** Azure Application Insights  
+<details>
+  <summary>🖥️ Backend</summary>
+  <ul>
+    <li><a href="https://dotnet.microsoft.com/en-us/download/dotnet/6.0">ASP NET Core 6.0 (C# 10)</a></li>
+    <li><a href="https://docs.microsoft.com/en-us/ef/core/">Entity Framework Core 6</a></li>
+  </ul>
+</details>
+
+<details>
+  <summary>🗄️ Database</summary>
+  <ul>
+    <li><a href="https://www.microsoft.com/en-us/sql-server">SQL Server (Azure SQL)</a></li>
+  </ul>
+</details>
+
+<details>
+  <summary>⚛️ Frontend</summary>
+  <ul>
+    <li><a href="https://reactjs.org/">React 19.1.0</a></li>
+    <li><a href="https://vitejs.dev/">Vite</a> (<code>@vitejs/plugin-react 4.4.1</code>)</li>
+  </ul>
+</details>
+
+<details>
+  <summary>🖌️ UI / Styling</summary>
+  <ul>
+    <li><a href="https://tailwindcss.com/">Tailwind CSS</a></li>
+    <li><a href="https://ui.shadcn.com/">shadcn/ui</a></li>
+    <li><a href="https://lucide.dev/">Lucide React icons</a></li>
+  </ul>
+</details>
+
+<details>
+  <summary>☁️ Cloud Services</summary>
+  <ul>
+    <li><a href="https://azure.microsoft.com/en-us/services/storage/blobs/">Azure Blob Storage</a></li>
+    <li><a href="https://azure.microsoft.com/en-us/services/cognitive-services/form-recognizer/">Azure Form Recognizer</a></li>
+    <li><a href="https://azure.microsoft.com/en-us/services/service-bus/">Azure Service Bus</a></li>
+  </ul>
+</details>
+
+<details>
+  <summary>🐳 Containerization & Hosting</summary>
+  <ul>
+    <li><a href="https://www.docker.com/">Docker</a></li>
+    <li><a href="https://fly.io/">Fly.io</a></li>
+  </ul>
+</details>
+
+<details>
+  <summary>📡 Web Server / Proxy</summary>
+  <ul>
+    <li><a href="https://nginx.org/">Nginx</a></li>
+  </ul>
+</details>
+
+<details>
+  <summary>🔒 Authentication</summary>
+  <ul>
+    <li>JWT Bearer tokens</li>
+  </ul>
+</details>
+
+<details>
+  <summary>📦 Package Management</summary>
+  <ul>
+    <li><a href="https://www.npmjs.com/">npm</a> (frontend)</li>
+    <li><a href="https://www.nuget.org/">NuGet</a> (backend)</li>
+  </ul>
+</details>
+
+<details>
+  <summary>📑 API Documentation</summary>
+  <ul>
+    <li><a href="https://swagger.io/specification/">Swagger / OpenAPI</a></li>
+    <li><a href="https://www.postman.com/">Postman Collection</a></li>
+  </ul>
+</details>
+
+<details>
+  <summary>🛠️ Local Dev & Scripts</summary>
+  <ul>
+    <li>Docker Compose for local end-to-end testing</li>
+  </ul>
+</details>
+
+<details>
+  <summary>🧪 Testing</summary>
+  <ul>
+    <li><a href="https://xunit.net/">xUnit</a> (backend)</li>
+  </ul>
+</details>
+
+<details>
+  <summary>🔄 CI/CD</summary>
+  <ul>
+    <li><a href="https://github.com/features/actions">GitHub Actions</a></li>
+    <li>Fly.io automatic deploy</li>
+  </ul>
+</details>
+
+<details>
+  <summary>📈 Monitoring</summary>
+  <ul>
+    <li><a href="https://azure.microsoft.com/en-us/services/monitor/">Azure Application Insights</a></li>
+  </ul>
+</details>
+
+<br />
+
+<table>
+  <tr>
+      <a href="https://dotnet.microsoft.com/">
+        <img src="https://img.shields.io/badge/.NET-6.0-512BD4?style=flat&logo=.net&logoColor=white" alt=".NET" />
+      </a>
+      <a href="https://reactjs.org/">
+        <img src="https://img.shields.io/badge/React-19.1.0-61DAFB?style=flat&logo=react&logoColor=black" alt="React" />
+      </a>
+      <a href="https://vitejs.dev/">
+        <img src="https://img.shields.io/badge/Vite-4.4.1-646CFF?style=flat&logo=vite&logoColor=white" alt="Vite" />
+      </a>
+      <a href="https://tailwindcss.com/">
+        <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+      </a>
+      <a href="https://azure.microsoft.com/">
+        <img src="https://img.shields.io/badge/Azure-0089D6?style=flat&logo=microsoft-azure&logoColor=white" alt="Azure" />
+      </a>
+      <a href="https://www.docker.com/">
+        <img src="https://img.shields.io/badge/Docker-20.10.0-2496ED?style=flat&logo=docker&logoColor=white" alt="Docker" />
+      </a>
+      <a href="https://fly.io/">
+        <img src="https://img.shields.io/badge/Fly.io-222222?style=flat&logo=fly-io&logoColor=white" alt="Fly.io" />
+      </a>
+      <a href="https://nginx.org/">
+        <img src="https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white" alt="Nginx" />
+      </a>
+      <a href="https://www.microsoft.com/en-us/sql-server">
+        <img src="https://img.shields.io/badge/SQL_Server-CC2927?style=flat&logo=microsoft-sql-server&logoColor=white" alt="SQL Server" />
+      </a>
+      <a href="https://www.npmjs.com/">
+        <img src="https://img.shields.io/badge/npm-latest-CB3837?style=flat&logo=npm&logoColor=white" alt="npm" />
+      </a>
+      <a href="https://github.com/features/actions">
+        <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white" alt="GitHub Actions" />
+      </a>
+      <a href="https://swagger.io/">
+        <img src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=flat&logo=swagger&logoColor=white" alt="Swagger" />
+      </a>
+  </tr>
+</table>
+
+
+
 
 <a id="architecture"></a>
 ## 🏛️ Architecture
