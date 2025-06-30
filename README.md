@@ -322,3 +322,49 @@ _Pure business entities with no external dependencies:_
 ---
 
 By following Clean Architecture, MatchFlow achieves high testability, clear module boundaries, and the ability to swap out or mock any external dependency (databases, cloud services, UI) without impacting the business core.
+
+## 📸 Screenshots
+### 🔒 Authentication
+
+![Authentication Flow](/frontend/public/authentication.gif)  
+*Figure 1: User logs in by entering username & password, then is taken to the main dashboard.*
+
+A simple, secure login step that grants access to the rest of the MatchFlow app.
+
+
+### 📊 Dashboard Overview
+
+![Dashboard](/frontend/public/dashboard.png)  
+*Figure 2: Central dashboard where you can:*
+1. Create a new Purchase Order  
+2. Upload invoices  
+3. Run Auto-Match and see results  
+4. Quickly view all invoices and POs in one place
+
+A single screen to kick off every step of your MatchFlow workflow.  
+
+### 🛒 Create & View Purchase Order
+
+![Create Purchase Order Flow](/frontend/public/purchase_order.gif)  
+*Figure 3: Fill out the PO form, submit it, and immediately land on the detailed Purchase Order page.*  
+
+A quick, end-to-end demo of creating a PO and reviewing its details in one seamless flow.  
+
+### 🧾 Sample Invoice
+
+![Sample Invoice](/frontend/public/sample_invoice.png)  
+*Figure 4: Cropped PDF showing invoice number, date, line items and totals used in our demo (all data is fictitious).*
+
+### 📥 Upload Invoice & Ready to Match
+
+![Upload Invoice Flow](/frontend/public/upload_invoice.gif)  
+*Figure 5: Upload your invoice PDF and instantly see its extracted details labeled “Ready to Match.”*
+
+Now you’re all set to run the auto-match and reconcile against your purchase orders.  
+
+### ✅ Auto-Match Results
+
+![Auto-Match Flow](/frontend/public/invoice_matching.gif)  
+*Figure 6: The Auto-Match engine processes your invoice and then confirms a 100% match—every line item and the total perfectly aligned with your Purchase Order.*  
+
+Instant peace of mind knowing your invoice is exactly what you ordered.
