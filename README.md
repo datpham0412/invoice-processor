@@ -106,6 +106,8 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 
 [![Architecture Diagram](/frontend/public/architecture.svg)](/frontend/public/architecture.svg)
 
+[View on Eraser![](https://app.eraser.io/workspace/1wX2yEL4ckFloMZ5chjD/preview?elements=22osCHEEW3uJF1qCVzKzKQ&type=embed)](https://app.eraser.io/workspace/1wX2yEL4ckFloMZ5chjD?elements=22osCHEEW3uJF1qCVzKzKQ) 
+
 MatchFlow is built on Clean Architecture principles, with clear separation of concerns across six horizontal layers. Requests flow from left to right (and back), while dependencies always point inward toward the core Domain layer. Below is a breakdown of each layer, the major components within it, and the primary data flows.
 
 ### 🖥️ 1. Client Layer  
