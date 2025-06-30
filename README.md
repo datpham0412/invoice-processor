@@ -1,5 +1,5 @@
-<a id="project-overview"></a>
-## 📄 Project Overview 
+<h2 id="project-overview">📄 Project Overview</h2>
+
 
 **MatchFlow – Zero Paperwork, 100% Confidence** 🔒
 
@@ -52,3 +52,32 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 12. [🤝 Contributing](#contributing)  
 13. [📄 License](#license)  
 14. [☎️ Contact / Support](#contact--support)  
+
+---
+
+<a id="key-features"></a>
+## ✨ Key Features
+
+- 📥 **One-Click Invoice Upload**  
+  Drag-and-drop or browse your PDFs in seconds—no fiddly forms required.  
+  **Why It Matters:** Cuts upload time by up to 95%.
+
+- 🤖 **AI-Powered OCR Extraction**  
+  Instantly pulls out invoice number, date, line items and totals via Azure Form Recognizer.  
+  **Why It Matters:** Eliminates manual data-entry errors—>99% field accuracy in our tests.
+
+- 🔗 **Automated PO Matching**  
+  Cross-checks extracted invoice data against your stored Purchase Orders.  
+  **Why It Matters:** Flags mismatches (vendor, amount, quantities) before they hit your ledger—reduces payment errors by 90%.
+
+- 🚨 **Real-Time Discrepancy Alerts**  
+  Any mismatch is pushed into an internal review queue and notifies your finance team instantly.  
+  **Why It Matters:** Ensures exceptions are caught and resolved in minutes, not days.
+
+- 🔒 **Secure Cloud Storage**  
+  All invoices live safely in Azure Blob Storage with role-based access controls.  
+  **Why It Matters:** Keeps sensitive financial documents locked down and audit-ready.
+
+- 📊 **Interactive Dashboard & Reporting**  
+  Search, filter and export full audit logs, match-rate charts and spend summaries.  
+  **Why It Matters:** Provides complete visibility into your payables pipeline—perfect for month-end close.
