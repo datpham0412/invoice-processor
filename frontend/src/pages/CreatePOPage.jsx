@@ -13,7 +13,7 @@ export default function CreatePOPage() {
   const [poNumber, setPoNumber] = useState("");
   const [vendorName, setVendorName] = useState("");
   const [issueDate, setIssueDate] = useState("");
-  const [lineItems, setLineItems] = useState([{ description: "", quantity: 1, unitPrice: 0 }]);
+  const [lineItems, setLineItems] = useState([{ description: "", quantity: 1, unitPrice: "" }]);
   const navigate = useNavigate()
 
 
@@ -209,18 +209,23 @@ export default function CreatePOPage() {
                           <div className="space-y-2">
                             <Label className="text-sm font-medium text-gray-700">Unit Price *</Label>
                             <div className="flex">
-                              <Input
-                                type="number"
-                                placeholder="0.00"
-                                value={item.unitPrice}
-                                onChange={(e) =>
-                                  handleLineItemChange(index, "unitPrice", Number.parseFloat(e.target.value) || 0)
-                                }
-                                required
-                                min="0"
-                                step="0.01"
-                                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                              />
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="0.00"
+                              value={item.unitPrice}
+                              onChange={e => handleLineItemChange(index, "unitPrice", e.target.value)}
+                              onBlur={() => {
+                                const num = parseFloat(item.unitPrice);
+                                handleLineItemChange(
+                                  index,
+                                  "unitPrice",
+                                  isNaN(num) ? "" : num.toFixed(2)
+                                );
+                              }}
+                              required
+                              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                            />
                               {lineItems.length > 1 && (
                                 <Button
                                   type="button"
