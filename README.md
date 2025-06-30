@@ -101,3 +101,85 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 - 🔄 **CI/CD:** GitHub Actions → Fly.io  
 - 📈 **Monitoring:** Azure Application Insights  
 
+<a id="architecture"></a>
+## 🏛️ Architecture
+
+[![Architecture Diagram](/frontend/public/architecture.svg)](/frontend/public/architecture.svg)
+
+MatchFlow is built on Clean Architecture principles, with clear separation of concerns across six horizontal layers. Requests flow from left to right (and back), while dependencies always point inward toward the core Domain layer. Below is a breakdown of each layer, the major components within it, and the primary data flows.
+
+### 🖥️ 1. Client Layer  
+- **Browser (React SPA)**  
+  - Contains ten page components:  
+    AuthPage, LandingPage, CreatePOPage, PurchaseOrdersPage, PurchaseOrderDetailsPage, DashboardPage, InvoicePage, AutoMatchPage, UploadInvoicePage, and UploadResultPage.  
+  - Sends and receives JWT-protected HTTPS calls to the Nginx proxy.
+
+### 🌐 2. Presentation Layer  
+- **Nginx Reverse Proxy** (Fly.io container “React+Nginx”)  
+  - Terminates TLS, serves the React bundle, and forwards API requests.  
+- **API Gateway** (.NET 6 Web API, Fly.io container “Backend”)  
+  - Hosts all controllers and orchestrates application logic.  
+- **Redirector** (Fly.io container)  
+  - Routes requests from `matchflow.app` → `www.matchflow.app`.
+
+### 🛡️ 3. Controller Layer  
+_All running inside the API Gateway container:_  
+- **AuthController** (handles login, JWT issuance & validation)  
+- **PurchaseOrderListController**  
+- **InvoiceListController**  
+- **InvoiceMatchController**  
+- **InvoiceUploadController**
+
+### 🧩 4. Application Layer  
+- **Services** (use-case implementations):  
+  - `CreatePurchaseOrderService`  
+  - `MatchingService`  
+  - `UploadInvoiceService`  
+  - `JWT Issuance & Validation` (via UserService)  
+- **Ports / Interfaces** (abstractions for infrastructure):  
+  - `IInvoiceRepository`, `IPurchaseOrderRepository`  
+  - `IFormRecognizer`, `IBlobStorage`  
+  - `IExceptionRecordRepository`, `IServiceBusClient`, `IUserService`  
+  - Dependencies are injected here, following the Dependency Inversion Principle.
+
+### 🛠️ 5. Infrastructure Layer  
+_Concrete implementations of all ports:_  
+- **EF Core Repositories**: `InvoiceRepository`, `PurchaseOrderRepository`, `ExceptionRecordRepository`, backed by `AppDbContext`  
+- **Azure Clients**: `BlobStorageService`, `FormRecognizerClient`, `ServiceBusClient`  
+- **UserService** (JWT key management & refresh logic)
+
+### 📦 6. Domain Layer  
+_Pure business entities with no external dependencies:_  
+- `Invoice`, `PurchaseOrder`, `InvoiceLineItem`, `PurchaseOrderLineItem`, `ExceptionRecord`, `User`  
+
+### ☁️ Cloud Services  
+- **Azure Blob Storage** (PDF persistence)  
+- **Azure Form Recognizer** (OCR)  
+- **Azure SQL Database** (POs, invoices, audit logs)  
+- **Azure Service Bus** (discrepancy messaging)  
+- **Application Insights** (telemetry & logging)
+
+### 🐳 Local Development  
+- **Docker Compose** spins up all containers (React+Nginx, API, SQL emulator, Blob emulator, etc.) for end-to-end testing without Azure.
+
+---
+
+### 🔄 Primary Data Flows
+
+1. **User Upload**  
+   Browser → Nginx (HTTPS + JWT) → API Gateway  
+2. **Invoice Processing**  
+   `UploadInvoiceController` → UploadInvoiceService  
+   → BlobStorageService → Azure Blob (POST PDF)  
+   → FormRecognizerClient → Azure Form Recognizer (extract JSON)  
+3. **Matching Logic**  
+   `UploadInvoiceService` → MatchingService → EF Repositories → Azure SQL  
+4. **Discrepancy Handling**  
+   On mismatch, UploadInvoiceService → ServiceBusClient → Azure Service Bus  
+   Front-end polls/subscribes for results  
+5. **Telemetry**  
+   All API calls and repository operations log to Application Insights  
+
+---
+
+By following Clean Architecture, MatchFlow achieves high testability, clear module boundaries, and the ability to swap out or mock any external dependency (databases, cloud services, UI) without impacting the business core.
