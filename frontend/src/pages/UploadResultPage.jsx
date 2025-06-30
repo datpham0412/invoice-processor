@@ -382,7 +382,7 @@ export default function UploadResultPage() {
                 </Button>
                 <Separator />
                 <Link to="/upload-invoice" className="w-full">
-                  <Button variant="default" className="w-full justify-start bg-blue-600 hover:bg-blue-700">
+                  <Button variant="default" className="w-full justify-start bg-blue-600 text-white hover:bg-blue-700 mb-3">
                     <Upload className="w-4 h-4 mr-2" />
                     Upload Another
                   </Button>
