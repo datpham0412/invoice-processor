@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
-import { Upload, ArrowLeft, AlertCircle, X, CheckCircle } from "lucide-react";
+import { Upload, ArrowLeft, AlertCircle, X, CheckCircle, FileText } from "lucide-react";
 import api from "@/api/api";
 import NavBar from "../components/NavBar";
 
@@ -10,6 +10,7 @@ export default function UploadInvoicePage() {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [response, setResponse] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -74,7 +75,20 @@ export default function UploadInvoicePage() {
       const { data } = await api.post("/invoices/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      navigate("/result", { state: { invoiceData: data } });
+      
+      // Set response for display
+      setResponse({
+        success: true,
+        filename: file.name,
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+        invoiceData: data
+      });
+
+      // Navigate to results page after a short delay
+      setTimeout(() => {
+        navigate("/result", { state: { invoiceData: data } });
+      }, 2000);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to upload invoice");
       console.error(err);
@@ -119,66 +133,101 @@ export default function UploadInvoicePage() {
           <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-gray-900">Invoice Upload</CardTitle>
-              <CardDescription>Select or drag-and-drop your PDF invoice</CardDescription>
+              <CardDescription>Select or drag and drop your PDF invoice file to upload and process</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div
-                  className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer ${
-                    isDragOver
-                      ? "border-indigo-400 bg-indigo-50"
-                      : file
-                      ? "border-green-300 bg-green-50"
-                      : "border-gray-300 hover:border-indigo-400 hover:bg-indigo-50"
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleInputChange}
-                    className="hidden"
-                  />
+                {/* File Upload Area */}
+                <div className="space-y-4">
+                  <div
+                    className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer ${
+                      isDragOver
+                        ? "border-indigo-400 bg-indigo-50"
+                        : file
+                        ? "border-green-300 bg-green-50"
+                        : "border-gray-300 hover:border-indigo-400 hover:bg-indigo-50"
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleInputChange}
+                      className="hidden"
+                      required
+                    />
 
-                  {!file ? (
-                    <div className="space-y-4">
-                      <div className="mx-auto w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <Upload className="w-8 h-8 text-indigo-600" />
+                    {!file ? (
+                      <div className="space-y-4">
+                        <div className="mx-auto w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
+                          <Upload className="w-8 h-8 text-indigo-600" />
+                        </div>
+                        <div>
+                          <p className="text-lg font-semibold text-gray-700 mb-2">
+                            {isDragOver ? "Drop your file here" : "Upload your invoice"}
+                          </p>
+                          <p className="text-sm text-gray-500">Drag and drop your PDF file here, or click to browse</p>
+                          <p className="text-xs text-gray-400 mt-2">Only PDF files are supported</p>
+                        </div>
                       </div>
-                      <p className="text-lg font-semibold text-gray-700">
-                        {isDragOver ? "Drop your file here" : "Upload your invoice"}
-                      </p>
-                      <p className="text-sm text-gray-500">Drag & drop PDF or click to browse</p>
-                      <p className="text-xs text-gray-400 mt-2">PDF only</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                        <Upload className="w-8 h-8 text-green-600" />
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                          <FileText className="w-8 h-8 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-lg font-semibold text-gray-700 mb-1">File Selected</p>
+                          <p className="text-sm text-gray-600">{file.name}</p>
+                          <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFile();
+                          }}
+                          className="border-red-200 text-red-600 hover:bg-red-50"
+                        >
+                          <X className="w-4 h-4 mr-2" />
+                          Remove File
+                        </Button>
                       </div>
-                      <p className="text-lg font-semibold text-gray-700">{file.name}</p>
-                      <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFile();
-                        }}
-                        className="border-red-200 text-red-600 hover:bg-red-50"
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        Remove File
-                      </Button>
+                    )}
+                  </div>
+
+                  {/* File Details */}
+                  {file && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-700 mb-2">File Details</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Name:</span>
+                          <p className="font-medium">{file.name}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Size:</span>
+                          <p className="font-medium">{formatFileSize(file.size)}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Type:</span>
+                          <p className="font-medium">PDF Document</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Last Modified:</span>
+                          <p className="font-medium">{new Date(file.lastModified).toLocaleDateString()}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
 
+                {/* Error Message */}
                 {error && (
                   <div className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg">
                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
@@ -186,13 +235,51 @@ export default function UploadInvoicePage() {
                   </div>
                 )}
 
+                {/* Success Response */}
+                {response && (
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <p className="text-green-700 text-sm font-medium">Invoice uploaded successfully!</p>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-700 mb-2">Upload Details</h4>
+                      <div className="text-sm space-y-1">
+                        <p>
+                          <span className="text-gray-500">Filename:</span> {response.filename}
+                        </p>
+                        <p>
+                          <span className="text-gray-500">Uploaded:</span>{" "}
+                          {new Date(response.uploadedAt).toLocaleString()}
+                        </p>
+                        <p>
+                          <span className="text-gray-500">Status:</span>{" "}
+                          <span className="text-green-600 font-medium">Processing</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Submit Button */}
                 <div className="flex justify-end pt-6">
                   <Button
                     type="submit"
                     disabled={isLoading || !file}
                     className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? "Uploading..." : "Upload Invoice"}
+                    {isLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Invoice
+                      </>
+                    )}
                   </Button>
                 </div>
               </form>
