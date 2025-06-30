@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { FileText, Plus, Trash2, ArrowLeft, CheckCircle, Upload } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "@/api/api";
 import NavBar from "../components/NavBar";
@@ -13,9 +13,9 @@ export default function CreatePOPage() {
   const [poNumber, setPoNumber] = useState("");
   const [vendorName, setVendorName] = useState("");
   const [issueDate, setIssueDate] = useState("");
-  const [lineItems, setLineItems] = useState([{ description: "", quantity: 1, unitPrice: "" }]);
+  const [lineItems, setLineItems] = useState([{ description: "", quantity: 1, unitPrice: 0 }]);
+  const [response, setResponse] = useState(null);
   const navigate = useNavigate()
-
 
   const handleLineItemChange = (index, field, value) => {
     const newItems = [...lineItems];
@@ -55,16 +55,18 @@ export default function CreatePOPage() {
       };
 
       // Simulate API call
-        const response = await api.post('/purchaseorders', payload)
+      const response = await api.post('/purchaseorders', payload)
 
-      alert("Purchase Order submitted successfully!");
-      console.log("Response:", response.data);
+      setResponse({
+        success: true,
+        poNumber,
+        vendorName,
+        totalAmount: calculateTotal(),
+        createdAt: new Date().toISOString(),
+        lineItemsCount: lineItems.length,
+      });
 
-      // Reset form
-      setPoNumber("");
-      setVendorName("");
-      setIssueDate("");
-      setLineItems([{ description: "", quantity: 1, unitPrice: 0 }]);
+      // No alert, no immediate reset
     } catch (err) {
       console.error("Failed to submit PO", err);
       alert("Failed to submit purchase order");
@@ -244,7 +246,7 @@ export default function CreatePOPage() {
                         {/* Line Total */}
                         <div className="mt-3 text-right">
                           <span className="text-sm text-gray-600">
-                            Line Total:{" "}
+                            Line Total: {" "}
                             <span className="font-semibold">${(item.quantity * item.unitPrice).toFixed(2)}</span>
                           </span>
                         </div>
@@ -285,6 +287,85 @@ export default function CreatePOPage() {
                   </Button>
                 </div>
               </form>
+
+              {/* Ready for Invoice Upload Section */}
+              {response && (
+                <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+                  <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-800">Purchase Order Created Successfully!</h4>
+                        <p className="text-gray-600 text-sm">
+                          PO {response.poNumber} is ready. You can now upload invoices to match against this purchase order.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Link to="/upload-invoice">
+                        <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200 transform hover:scale-[1.02]">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload Invoice
+                        </Button>
+                      </Link>
+                      <Link to="/purchase-orders">
+                        <Button
+                          variant="outline"
+                          className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2 bg-transparent"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          View All POs
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Quick Stats */}
+                  <div className="mt-4 pt-4 border-t border-blue-200/50">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center p-3 bg-white/60 rounded-lg">
+                        <div className="text-lg font-bold text-blue-600">{response.poNumber}</div>
+                        <div className="text-xs text-gray-600">PO Number</div>
+                      </div>
+                      <div className="text-center p-3 bg-white/60 rounded-lg">
+                        <div className="text-lg font-bold text-green-600">${response.totalAmount.toFixed(2)}</div>
+                        <div className="text-xs text-gray-600">Total Amount</div>
+                      </div>
+                      <div className="text-center p-3 bg-white/60 rounded-lg">
+                        <div className="text-lg font-bold text-purple-600">{response.lineItemsCount}</div>
+                        <div className="text-xs text-gray-600">Line Items</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Next Steps */}
+                  <div className="mt-4 pt-4 border-t border-blue-200/50">
+                    <h5 className="font-semibold text-gray-700 mb-2">Next Steps:</h5>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-xs text-white font-bold">1</span>
+                        </div>
+                        <span>Upload invoices from {response.vendorName}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-xs text-white font-bold">2</span>
+                        </div>
+                        <span>Let our AI automatically match invoices to this PO</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-xs text-white font-bold">3</span>
+                        </div>
+                        <span>Review and approve matched results</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
