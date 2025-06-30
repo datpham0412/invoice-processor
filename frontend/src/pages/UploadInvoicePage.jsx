@@ -84,11 +84,6 @@ export default function UploadInvoicePage() {
         uploadedAt: new Date().toISOString(),
         invoiceData: data
       });
-
-      // Navigate to results page after a short delay
-      setTimeout(() => {
-        navigate("/result", { state: { invoiceData: data } });
-      }, 2000);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to upload invoice");
       console.error(err);
@@ -237,29 +232,83 @@ export default function UploadInvoicePage() {
 
                 {/* Success Response */}
                 {response && (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <p className="text-green-700 text-sm font-medium">Invoice uploaded successfully!</p>
-                    </div>
+                  <>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <p className="text-green-700 text-sm font-medium">Invoice uploaded successfully!</p>
+                      </div>
 
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-700 mb-2">Upload Details</h4>
-                      <div className="text-sm space-y-1">
-                        <p>
-                          <span className="text-gray-500">Filename:</span> {response.filename}
-                        </p>
-                        <p>
-                          <span className="text-gray-500">Uploaded:</span>{" "}
-                          {new Date(response.uploadedAt).toLocaleString()}
-                        </p>
-                        <p>
-                          <span className="text-gray-500">Status:</span>{" "}
-                          <span className="text-green-600 font-medium">Processing</span>
-                        </p>
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-700 mb-2">Upload Details</h4>
+                        <div className="text-sm space-y-1">
+                          <p>
+                            <span className="text-gray-500">Filename:</span> {response.filename}
+                          </p>
+                          <p>
+                            <span className="text-gray-500">Uploaded:</span>{" "}
+                            {new Date(response.uploadedAt).toLocaleString()}
+                          </p>
+                          <p>
+                            <span className="text-gray-500">Status:</span>{" "}
+                            <span className="text-green-600 font-medium">Processing</span>
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+
+                    {/* Ready to Match Section */}
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6 mt-6">
+                      <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-800">Invoice Ready for Matching!</h4>
+                            <p className="text-gray-600 text-sm">
+                              Your invoice has been processed and is ready to be matched with purchase orders.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Link to="/auto-match">
+                            <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200 transform hover:scale-[1.02]">
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Start Auto-Match
+                            </Button>
+                          </Link>
+                          <Link to="/invoices">
+                            <Button
+                              variant="outline"
+                              className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2 bg-transparent"
+                            >
+                              <FileText className="w-4 h-4 mr-2" />
+                              View All Invoices
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Quick Stats */}
+                      <div className="mt-4 pt-4 border-t border-green-200/50">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="text-center p-3 bg-white/60 rounded-lg">
+                            <div className="text-lg font-bold text-green-600">Ready</div>
+                            <div className="text-xs text-gray-600">Status</div>
+                          </div>
+                          <div className="text-center p-3 bg-white/60 rounded-lg">
+                            <div className="text-lg font-bold text-blue-600">~5s</div>
+                            <div className="text-xs text-gray-600">Est. Match Time</div>
+                          </div>
+                          <div className="text-center p-3 bg-white/60 rounded-lg">
+                            <div className="text-lg font-bold text-purple-600">AI-Powered</div>
+                            <div className="text-xs text-gray-600">Matching Engine</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 {/* Submit Button */}
