@@ -30,7 +30,6 @@ The entire end-to-end flow—PO entry through discrepancy resolution—takes jus
 
 MatchFlow delivers real, measurable value by automating repetitive finance tasks—so you can focus on your business, not on paperwork.
 
----
 
 ## 📑 Table of Contents 
 
@@ -53,7 +52,6 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 13. [📄 License](#license)  
 14. [☎️ Contact / Support](#contact--support)  
 
----
 
 <a id="key-features"></a>
 ## ✨ Key Features
@@ -81,3 +79,25 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 - 📊 **Interactive Dashboard & Reporting**  
   Search, filter and export full audit logs, match-rate charts and spend summaries.  
   **Why It Matters:** Provides complete visibility into your payables pipeline—perfect for month-end close.
+
+<a id="tech-stack"></a>
+## 🛠️ Tech Stack
+
+- 🖥️ **Backend:** ASP NET Core 6.0 (C# 10), Entity Framework Core 6  
+- 🗄️ **Database:** SQL Server (Azure SQL)  
+- ⚛️ **Frontend:** React 19.1.0 + Vite, @vitejs/plugin-react 4.4.1  
+- 🖌️ **UI / Styling:** Tailwind CSS, shadcn/ui, Lucide React icons  
+- ☁️ **Cloud Services:**  
+  - Azure Blob Storage (invoice PDFs)  
+  - Azure Cognitive Services (Form Recognizer)  
+  - Azure Service Bus (exception queue)  
+- 🐳 **Containerization:** Docker → Fly.io  
+- 📡 **Web Server / Proxy:** Nginx  
+- 🔒 **Authentication:** JWT Bearer tokens  
+- 📦 **Package Management:** npm (frontend), NuGet (backend)  
+- 📑 **API Documentation:** Swagger / OpenAPI spec, Postman Collection  
+- 🛠️ **Local Dev & Scripts:** Docker Compose for local end-to-end  
+- 🧪 **Testing:** xUnit (backend)
+- 🔄 **CI/CD:** GitHub Actions → Fly.io  
+- 📈 **Monitoring:** Azure Application Insights  
+
