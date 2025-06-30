@@ -198,7 +198,7 @@ export default function PurchaseOrderDetailsPage() {
                 </Button>
                 <Separator />
                 <Link to="/create-po">
-                  <Button variant="default" className="w-full justify-start bg-teal-600 hover:bg-teal-700">
+                  <Button variant="default" className="w-full justify-start bg-teal-600 text-white hover:bg-teal-700">
                     <FileText className="w-4 h-4 mr-2"/> Create New PO
                   </Button>
                 </Link>
