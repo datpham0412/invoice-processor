@@ -1,4 +1,4 @@
-<h2 id="project-overview">📄 Project Overview</h2>
+<h2 id="project-overview"> Project Overview</h2>
 
 
 **MatchFlow – Zero Paperwork, 100% Confidence** 
@@ -85,7 +85,7 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 ##  Tech Stack
 
 <details>
-  <summary>🖥️ Backend</summary>
+  <summary> Backend</summary>
   <ul>
     <li><a href="https://dotnet.microsoft.com/en-us/download/dotnet/6.0">ASP NET Core 6.0 (C# 10)</a></li>
     <li><a href="https://docs.microsoft.com/en-us/ef/core/">Entity Framework Core 6</a></li>
