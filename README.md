@@ -323,6 +323,9 @@ _Pure business entities with no external dependencies:_
 
 By following Clean Architecture, MatchFlow achieves high testability, clear module boundaries, and the ability to swap out or mock any external dependency (databases, cloud services, UI) without impacting the business core.
 
+
+![Context Diagram](/frontend/public/context_diagram.svg)
+
 ##  Screenshots
 ###  Authentication
 
