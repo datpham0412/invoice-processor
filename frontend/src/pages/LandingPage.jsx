@@ -183,6 +183,7 @@ export default function LandingPage() {
                 variant="outline"
                 size="lg"
                 className="px-8 py-4 text-lg font-medium border-gray-300 hover:bg-gray-50 bg-transparent"
+                onClick={() => window.open('https://www.youtube.com/watch?v=e9RLF5Vx_K0', '_blank')}
               >
                 Watch Demo
               </Button>
