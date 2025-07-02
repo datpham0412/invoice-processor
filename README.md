@@ -326,7 +326,6 @@ By following Clean Architecture, MatchFlow achieves high testability, clear modu
 
 ![Context Diagram](/frontend/public/context_diagram.png)
 ![Context Diagram](/frontend/public/component_diagram.png)
-![Context Diagram](/frontend/public/code_diagram.png)
 
 
 
