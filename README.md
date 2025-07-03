@@ -239,95 +239,99 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 
 
 <a id="architecture"></a>
-##  Architecture
+## Architecture
 
-[![Architecture Diagram](/frontend/public/architecture.svg)](/frontend/public/architecture.svg)
+MatchFlow’s architecture is described in two C4-style component views plus a layer breakdown:
 
+1. **System Context & High-Level Components**  
+2. **Detailed Clean-Architecture Components**  
+3. **Layer-by-Layer Breakdown**
+
+---
+
+### 1. System Context & High-Level Components  
+*Who uses the system and the major “boxes” it interacts with*  
+
+![System Context Diagram](/frontend/public/context_diagram.png)  
+![High-Level Component Diagram](/frontend/public/component_diagram.png)  
+
+- **Users** (Invoice Managers) in their browser  
+- **React SPA + Nginx** (Fly.io container “React+Nginx”): serves UI, terminates TLS, forwards API calls  
+- **.NET 6 API Gateway** (Fly.io container “Backend”): hosts all Controllers and Services  
+- **Redirector** (Fly.io): 301-redirects `matchflow.app` → `www.matchflow.app`  
+- **Azure Cloud Services**:  
+  - Blob Storage (PDF persistence)  
+  - Form Recognizer (OCR)  
+  - SQL Database (POs, invoices, audit logs)  
+  - Service Bus (discrepancy messaging)  
+  - Application Insights (telemetry & logging)
+
+---
+
+### 2. Detailed Clean-Architecture Components  
+*Internal layering and dependencies*  
+
+![Detailed Architecture Diagram](/frontend/public/architecture.svg)  
 [View on Eraser![](https://app.eraser.io/workspace/1wX2yEL4ckFloMZ5chjD/preview?elements=22osCHEEW3uJF1qCVzKzKQ&type=embed)](https://app.eraser.io/workspace/1wX2yEL4ckFloMZ5chjD?elements=22osCHEEW3uJF1qCVzKzKQ) 
 
-MatchFlow is built on Clean Architecture principles, with clear separation of concerns across six horizontal layers. Requests flow from left to right (and back), while dependencies always point inward toward the core Domain layer. Below is a breakdown of each layer, the major components within it, and the primary data flows.
+- **Controllers**  
+  - AuthController, PurchaseOrderListController, InvoiceListController, InvoiceMatchController, InvoiceUploadController  
+- **Application Services (Use-Cases)**  
+  - CreatePurchaseOrderService  
+  - MatchingService  
+  - UploadInvoiceService  
+  - JWT issuance & validation via UserService  
+- **Ports / Interfaces**  
+  - IInvoiceRepository, IPurchaseOrderRepository  
+  - IFormRecognizer, IBlobStorage  
+  - IExceptionRecordRepository, IServiceBusClient, IUserService  
+- **Infrastructure**  
+  - EF Core Repositories: InvoiceRepository, PurchaseOrderRepository, ExceptionRecordRepository (via AppDbContext)  
+  - Azure SDK Clients: BlobStorageService, FormRecognizerClient, ServiceBusClient  
+  - UserService (JWT key management & refresh logic)  
+- **Domain Entities**  
+  - Invoice, PurchaseOrder, InvoiceLineItem, PurchaseOrderLineItem, ExceptionRecord, User  
 
-###  1. Client Layer  
+---
+
+### 3. Layer-by-Layer Breakdown  
+
+#### Client Layer  
 - **Browser (React SPA)**  
-  - Contains ten page components:  
-    AuthPage, LandingPage, CreatePOPage, PurchaseOrdersPage, PurchaseOrderDetailsPage, DashboardPage, InvoicePage, AutoMatchPage, UploadInvoicePage, and UploadResultPage.  
-  - Sends and receives JWT-protected HTTPS calls to the Nginx proxy.
+  - Pages: AuthPage, LandingPage, CreatePOPage, PurchaseOrdersPage, PurchaseOrderDetailsPage, DashboardPage, InvoicePage, AutoMatchPage, UploadInvoicePage, UploadResultPage  
+  - Communicates over HTTPS+JWT with Nginx
 
-###  2. Presentation Layer  
-- **Nginx Reverse Proxy** (Fly.io container “React+Nginx”)  
-  - Terminates TLS, serves the React bundle, and forwards API requests.  
-- **API Gateway** (.NET 6 Web API, Fly.io container “Backend”)  
-  - Hosts all controllers and orchestrates application logic.  
-- **Redirector** (Fly.io container)  
-  - Routes requests from `matchflow.app` → `www.matchflow.app`.
+#### Presentation Layer  
+- **Nginx Reverse Proxy**  
+  - TLS termination, static-file serving, API forwarding  
+- **Redirector**  
+  - 301 redirects apex domain → `www`
 
-###  3. Controller Layer  
-_All running inside the API Gateway container:_  
-- **AuthController** (handles login, JWT issuance & validation)  
-- **PurchaseOrderListController**  
-- **InvoiceListController**  
-- **InvoiceMatchController**  
-- **InvoiceUploadController**
+#### Controller Layer  
+_All inside the .NET API Gateway container_  
+- AuthController  
+- PurchaseOrderListController  
+- InvoiceListController  
+- InvoiceMatchController  
+- InvoiceUploadController  
 
-###  4. Application Layer  
-- **Services** (use-case implementations):  
-  - `CreatePurchaseOrderService`  
-  - `MatchingService`  
-  - `UploadInvoiceService`  
-  - `JWT Issuance & Validation` (via UserService)  
-- **Ports / Interfaces** (abstractions for infrastructure):  
-  - `IInvoiceRepository`, `IPurchaseOrderRepository`  
-  - `IFormRecognizer`, `IBlobStorage`  
-  - `IExceptionRecordRepository`, `IServiceBusClient`, `IUserService`  
-  - Dependencies are injected here, following the Dependency Inversion Principle.
+#### Application Layer  
+- **Use-Case Services**  
+  - CreatePurchaseOrderService  
+  - MatchingService  
+  - UploadInvoiceService  
+- **Dependency-Inverted Ports**  
+  - IInvoiceRepository, IPurchaseOrderRepository, IFormRecognizer, IBlobStorage, IExceptionRecordRepository, IServiceBusClient, IUserService  
 
-###  5. Infrastructure Layer  
-_Concrete implementations of all ports:_  
-- **EF Core Repositories**: `InvoiceRepository`, `PurchaseOrderRepository`, `ExceptionRecordRepository`, backed by `AppDbContext`  
-- **Azure Clients**: `BlobStorageService`, `FormRecognizerClient`, `ServiceBusClient`  
-- **UserService** (JWT key management & refresh logic)
+#### Infrastructure Layer  
+- **EF Core Repositories** (Invoice, PO, ExceptionRecord)  
+- **Azure SDK Clients** (BlobStorage, FormRecognizer, ServiceBus)  
+- **UserService** (JWT management)
 
-###  6. Domain Layer  
-_Pure business entities with no external dependencies:_  
-- `Invoice`, `PurchaseOrder`, `InvoiceLineItem`, `PurchaseOrderLineItem`, `ExceptionRecord`, `User`  
+#### Domain Layer  
+- Plain C# business entities: Invoice, PurchaseOrder, InvoiceLineItem, PurchaseOrderLineItem, ExceptionRecord, User  
 
-###  Cloud Services  
-- **Azure Blob Storage** (PDF persistence)  
-- **Azure Form Recognizer** (OCR)  
-- **Azure SQL Database** (POs, invoices, audit logs)  
-- **Azure Service Bus** (discrepancy messaging)  
-- **Application Insights** (telemetry & logging)
-
-###  Local Development  
-- **Docker Compose** spins up all containers (React+Nginx, API, SQL emulator, Blob emulator, etc.) for end-to-end testing without Azure.
-
----
-
-###  Primary Data Flows
-
-1. **User Upload**  
-   Browser → Nginx (HTTPS + JWT) → API Gateway  
-2. **Invoice Processing**  
-   `UploadInvoiceController` → UploadInvoiceService  
-   → BlobStorageService → Azure Blob (POST PDF)  
-   → FormRecognizerClient → Azure Form Recognizer (extract JSON)  
-3. **Matching Logic**  
-   `UploadInvoiceService` → MatchingService → EF Repositories → Azure SQL  
-4. **Discrepancy Handling**  
-   On mismatch, UploadInvoiceService → ServiceBusClient → Azure Service Bus  
-   Front-end polls/subscribes for results  
-5. **Telemetry**  
-   All API calls and repository operations log to Application Insights  
-
----
-
-By following Clean Architecture, MatchFlow achieves high testability, clear module boundaries, and the ability to swap out or mock any external dependency (databases, cloud services, UI) without impacting the business core.
-
-
-![Context Diagram](/frontend/public/context_diagram.png)
-![Context Diagram](/frontend/public/component_diagram.png)
-
-
+ 
 
 ##  Screenshots
 ###  Authentication
