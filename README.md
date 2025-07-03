@@ -40,11 +40,11 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 5. [ Screenshots](#screenshots)  
 6. [ Getting Started](#getting-started)  
    - [ Prerequisites](#prerequisites)  
-   - [ Installation](#installation)  
+   - [ Installation](#installation)   
    - [ Configuration](#configuration)  
    - [ Running the App](#running-the-app)  
 7. [ License](#license)  
-8. [ Contact / Support](#contact--support)  
+8. [ Contact](#contact)  
 
 
 <a id="key-features"></a>
