@@ -491,3 +491,13 @@ web-1 | 2025/07/03 02:36:11 [notice] nginx/1.28.0
 backend-1 | info: Now listening on: http://[::]:80
 backend-1 | info: Application started. Press Ctrl+C to shut down.
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+For any inquiries, please open an issue in the GitHub repository.
+
+Made by [Dat Pham](https://github.com/datpham0412)
