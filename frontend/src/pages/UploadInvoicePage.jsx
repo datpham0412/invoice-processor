@@ -131,7 +131,7 @@ export default function UploadInvoicePage() {
               <CardDescription>Select or drag and drop your PDF invoice file to upload and process</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6 noValidate">
                 {/* File Upload Area */}
                 <div className="space-y-4">
                   <div
@@ -153,7 +153,6 @@ export default function UploadInvoicePage() {
                       accept=".pdf"
                       onChange={handleInputChange}
                       className="hidden"
-                      required
                     />
 
                     {!file ? (
