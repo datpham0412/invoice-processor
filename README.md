@@ -37,20 +37,14 @@ MatchFlow delivers real, measurable value by automating repetitive finance tasks
 2. [ Key Features](#key-features)  
 3. [ Tech Stack](#tech-stack)  
 4. [ Architecture](#architecture)  
-5. [ Screenshots / Demo](#screenshots--demo)  
+5. [ Screenshots](#screenshots)  
 6. [ Getting Started](#getting-started)  
    - [ Prerequisites](#prerequisites)  
    - [ Installation](#installation)  
    - [ Configuration](#configuration)  
    - [ Running the App](#running-the-app)  
-7. [ API Reference](#api-reference)  
-8. [ Usage Examples](#usage-examples)  
-9. [ Testing](#testing)  
-10. [ Deployment](#deployment)  
-11. [ Roadmap](#roadmap)  
-12. [ Contributing](#contributing)  
-13. [ License](#license)  
-14. [ Contact / Support](#contact--support)  
+7. [ License](#license)  
+8. [ Contact / Support](#contact--support)  
 
 
 <a id="key-features"></a>
@@ -332,7 +326,7 @@ _All inside the .NET API Gateway container_
 - Plain C# business entities: Invoice, PurchaseOrder, InvoiceLineItem, PurchaseOrderLineItem, ExceptionRecord, User  
 
  
-
+<a id="screenshots"></a>
 ##  Screenshots
 ###  Authentication
 
@@ -378,3 +372,122 @@ Now you’re all set to run the auto-match and reconcile against your purchase o
 *Figure 6: The Auto-Match engine processes your invoice and then confirms a 100% match—every line item and the total perfectly aligned with your Purchase Order.*  
 
 Instant peace of mind knowing your invoice is exactly what you ordered.
+
+
+<a id="getting-started"></a>
+## Getting Started
+
+Follow these steps to get MatchFlow up and running locally via Docker Compose.
+
+---
+
+### Prerequisites
+
+#### Local Development Tools
+- **Docker Engine** ≥ 20.10  
+- **Docker Compose** ≥ 1.29  
+- A modern web browser (Chrome, Firefox, Safari, Edge)
+
+#### Azure Resources
+Before running MatchFlow, you need to set up these Azure services:
+
+- **Azure Blob Storage**
+  - Create a storage account
+  - Create a container for PDF storage
+  - Get the connection string and container name
+
+- **Azure Form Recognizer**
+  - Create a Form Recognizer resource
+  - Get the endpoint URL and API key
+
+> **Note:** These Azure resources are required for PDF storage and OCR processing. You'll configure them in the `.env` file during installation.
+
+---
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/datpham0412/invoice-processor.git
+   cd invoice-processor
+   ```
+
+2. **Create environment file**
+   
+   Copy or create `InvoiceProcessor.API/.env` with the following configuration:
+   
+   ```env
+   # Database Connection
+   CONNECTIONSTRINGS__DefaultConnection=Server=(localdb)\\MSSQLLocalDB;Database=InvoiceProcessorDev;Trusted_Connection=True;MultipleActiveResultSets=true
+   
+   # Development Settings
+   DISABLE_HTTPS_REDIRECT=true
+   
+   AZUREBLOB__ConnectionString=
+   AZUREBLOB__ContainerName=
+   FORMRECOGNIZER__Endpoint=
+   FORMRECOGNIZER__ApiKey=
+   
+   # JWT Authentication
+   JWT__Key=your-secret-key-here
+   JWT__Issuer=matchflow
+   JWT__Audience=matchflow-users
+   JWT__ExpiresInMinutes=60
+   ```
+   
+---
+
+### Configuration
+
+-   The Docker Compose network `invoice-net` connects both services.
+-   **backend** (host 8080 → container 80) reads your `.env` and runs in Production mode.
+-   **web** (host 3000 → container 80) uses `VITE_API_URL=http://backend/api`.
+
+> **Note:** Populate the `AZUREBLOB__*` and `FORMRECOGNIZER__*` keys in your `.env` file with the Azure resource details you set up in the Prerequisites section.
+
+---
+
+### Running the App
+
+From the project root:
+
+```bash
+docker-compose up --build
+```
+
+#### Additional Commands
+
+**Run in background:**
+```bash
+docker-compose up --build -d
+```
+
+**View logs:**
+```bash
+docker-compose logs -f
+```
+
+**Stop services:**
+```bash
+docker-compose down
+```
+    
+
+Once up, the frontend is available at:
+
+> **[http://localhost:3000](http://localhost:3000)**
+
+and the API listens on:
+
+> **[http://localhost:8080](http://localhost:8080)**
+
+---
+
+#### Sample Startup Output
+
+```text
+Attaching to backend-1, web-1
+web-1 | 2025/07/03 02:36:11 [notice] nginx/1.28.0
+backend-1 | info: Now listening on: http://[::]:80
+backend-1 | info: Application started. Press Ctrl+C to shut down.
+```
